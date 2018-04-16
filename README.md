@@ -1,11 +1,13 @@
 # TypetalkDeck
 
+[Typetalk](https://www.typetalk.com) client app like [TweetDeck](https://tweetdeck.twitter.com/).
+
 ## setup
 ### Add `secret.json` file.
 ```json
 {
   "client_id": "YOUR CLIENT ID",
-  "client_secret": "YOUR SECRET"
+  "client_secret": "YOUR CLIENT SECRET"
 }
 ```
 
