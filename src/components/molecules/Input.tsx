@@ -1,16 +1,8 @@
 import { h } from "hyperapp";
 import Actions from "../../Actions";
 import { typetalkApi } from "../../Api";
-import { pstyle } from "../../polyfills/picostyle";
 import { IPostParam, ITopic } from "../../typetalk/Models";
-
-const Wrapper = pstyle("div")({
-  "line-height": "32px",
-  "display": "flex",
-  "textarea": {
-    "flex-grow": 1
-  }
-});
+import "./Input.css";
 
 export default ({ actions, topic, replyTo }: { topic: ITopic, actions: Actions, replyTo?: number}) => {
 
@@ -32,7 +24,9 @@ export default ({ actions, topic, replyTo }: { topic: ITopic, actions: Actions, 
   };
 
   return (
-    <Wrapper oncreate={(elm: HTMLElement) => {elm.querySelector("textarea").focus(); }}>
+    <div
+      class="Input"
+      oncreate={(elm: HTMLElement) => {elm.querySelector("textarea").focus(); }}>
       <textarea
         oninput={(e: KeyboardEvent) => {
           localState.message = (e.target as HTMLTextAreaElement).value;
@@ -51,6 +45,6 @@ export default ({ actions, topic, replyTo }: { topic: ITopic, actions: Actions, 
           const textarea = (e.target as HTMLElement).parentElement.querySelector("textarea");
           post(textarea);
         }}>Post</button>
-    </Wrapper>
+    </div>
   );
 };

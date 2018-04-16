@@ -1,23 +1,8 @@
 import { h } from "hyperapp";
 import Actions from "../../Actions";
 import { typetalkApi } from "../../Api";
-import { pstyle } from "../../polyfills/picostyle";
 import { IState } from "../../State";
-import { classNames } from "../../utils/utils";
-
-const Tablist = pstyle("ul")({
-  "li.selected": {
-    button: {
-      color: "#ffa695"
-    }
-  }
-});
-
-const Scroll = pstyle("ul")({
-  "li:last-child": {
-    "margin-bottom": "20px"
-  }
-});
+import "./TopicList.css";
 
 export default ({state, actions}: {state: IState, actions: Actions}) => {
 
@@ -32,19 +17,27 @@ export default ({state, actions}: {state: IState, actions: Actions}) => {
   })();
 
   return [
-    <Tablist>
-      <li class={classNames([
-        state.view.tabName === "all" ? "selected" : null
-      ])}>
-        <button type="button" onclick={() => { actions.tabName("all"); }}>All</button>
+    <ul>
+      <li>
+        <button
+          class={
+            state.view.tabName === "all"
+            ? "TopicList__tablist--selected" : null
+          }
+          type="button"
+          onclick={() => { actions.tabName("all"); }}>All</button>
       </li>
-      <li class={classNames([
-        state.view.tabName === "favorites" ? "selected" : null
-      ])}>
-        <button type="button" onclick={() => { actions.tabName("favorites"); }}>Favorites</button>
+      <li>
+        <button
+          class={
+            state.view.tabName === "favorites"
+            ? "TopicList__tablist--selected" : null
+          }
+          type="button"
+          onclick={() => { actions.tabName("favorites"); }}>Favorites</button>
       </li>
-    </Tablist>,
-    <Scroll>
+    </ul>,
+    <ul class="TopicList__list">
       {
         visibleTopics.map((topic) => (
           <li>
@@ -60,6 +53,6 @@ export default ({state, actions}: {state: IState, actions: Actions}) => {
           </li>
         ))
       }
-    </Scroll>
+    </ul>
   ];
 };

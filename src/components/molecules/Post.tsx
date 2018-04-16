@@ -1,37 +1,9 @@
 import { h } from "hyperapp";
 import Actions from "../../Actions";
 import { typetalkApi } from "../../Api";
-import { pstyle } from "../../polyfills/picostyle";
 import { IView } from "../../State";
 import { IPost } from "../../typetalk/Models";
-
-const Wrapper = pstyle("div")({
-  "display": "flex",
-  "div.thumbnail-container": {
-    width: "40px",
-    height: "40px",
-    img: {
-      width: "40px",
-      height: "40px"
-    }
-  },
-
-  "p": {
-    "font-size": "14px",
-  },
-
-  "p.post-message": {
-    "line-height": "16px"
-  },
-
-  "button.post-container": {
-    "padding": 0,
-    "background": "#fff",
-    "border": "none",
-    "text-align": "left"
-  }
-
-});
+import "./Post.css";
 
 export default ({post, isObserve, actions, view}: {post: IPost, isObserve: boolean, actions: Actions, view: IView}) => {
   const oncreate = isObserve ?
@@ -47,13 +19,13 @@ export default ({post, isObserve, actions, view}: {post: IPost, isObserve: boole
     }
     : null;
   return (
-    <Wrapper oncreate={oncreate}>
-      <div class="thumbnail-container">
+    <div class="Post" oncreate={oncreate}>
+      <div class="Post__thumbnail-container">
         <img src={post.account.imageUrl} alt={post.account.fullName} />
       </div>
       <button
         type="button"
-        class="post-container"
+        class="Post__post-container"
         onclick={() => {
           console.log("onclick", post);
           if (view.replyInput === post.id) {
@@ -63,8 +35,8 @@ export default ({post, isObserve, actions, view}: {post: IPost, isObserve: boole
           }
         }}>
         <p>{post.account.fullName}</p>
-        <p class="post-message">{post.message}</p>
+        <p class="Post__post-message">{post.message}</p>
       </button>
-    </Wrapper>
+    </div>
   );
 };

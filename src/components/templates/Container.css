@@ -1,0 +1,34 @@
+body {
+  padding: 0;
+  margin: 0;
+}
+
+ul, p {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  list-style: none;
+}
+
+.Container {
+  display: flex;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-family: "Open Sans"Hiragino SansMeiryo,Helvetica,Arial,sans-serif;
+}
+
+.Container__topic-list {
+  height: 100vh;
+  flex-basis: 300px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.Container__post-list {
+  flex-basis: 400px;
+  flex-shrink: 0;
+}

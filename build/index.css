@@ -1,0 +1,108 @@
+.Input {
+  line-height: 32px;
+  display: flex;
+}
+
+.Input textarea {
+  flex-grow: 1;
+}.Post {
+  display: flex;
+}
+
+.Post__thumbnail-container {
+  width: 40px;
+  height: 40px;
+}
+
+.Post__thumbnail-container>img {
+  width: 40px;
+  height: 40px;
+}
+
+.Post p {
+  font-size: 14px;
+}
+
+.Post__post-container {
+  padding: 0;
+  background: #fff;
+  border: none;
+  text-align: left;
+}
+
+.Post__post-message {
+  padding: 0;
+  background: #fff;
+  border: none;
+  text-align: left;
+}.PostList__title {
+  line-height: 32px;
+}
+
+.PostList__scroll {
+  height: calc(100vh - 32px - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  word-break: break-word;
+}
+
+.PostList__scroll>li {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.PostList__scroll>li:last-child {
+  margin-bottom: 20px;
+}
+
+.PostList__reply-line {
+  border-left: 3px solid;
+  bottom: 100%;
+  left: 19px;
+  position: absolute;
+  height: 0;
+}
+
+.PostList__reply-line--unconnected {
+  border-style: dotted;
+}
+.TopicList__tablist--selected {
+  color: #ffa695;
+}
+
+.TopicList__list:last-child {
+  margin-bottom: 20px;
+}body {
+  padding: 0;
+  margin: 0;
+}
+
+ul, p {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  list-style: none;
+}
+
+.Container {
+  display: flex;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: hidden;
+  font-family: "Open Sans"Hiragino SansMeiryo,Helvetica,Arial,sans-serif;
+}
+
+.Container__topic-list {
+  height: 100vh;
+  flex-basis: 300px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.Container__post-list {
+  flex-basis: 400px;
+  flex-shrink: 0;
+}

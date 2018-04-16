@@ -1,0 +1,31 @@
+.Post {
+  display: flex;
+}
+
+.Post__thumbnail-container {
+  width: 40px;
+  height: 40px;
+}
+
+.Post__thumbnail-container>img {
+  width: 40px;
+  height: 40px;
+}
+
+.Post p {
+  font-size: 14px;
+}
+
+.Post__post-container {
+  padding: 0;
+  background: #fff;
+  border: none;
+  text-align: left;
+}
+
+.Post__post-message {
+  padding: 0;
+  background: #fff;
+  border: none;
+  text-align: left;
+}

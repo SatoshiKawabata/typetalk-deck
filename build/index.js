@@ -186,7 +186,7 @@ var Actions = /** @class */function () {
     return Actions;
 }();
 exports["default"] = Actions;
-},{}],10:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -355,7 +355,7 @@ var TypeTalk = /** @class */function () {
     return TypeTalk;
 }();
 exports["default"] = TypeTalk;
-},{"./Streaming":10}],3:[function(require,module,exports) {
+},{"./Streaming":7}],3:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -367,25 +367,7 @@ var Typetalk_1 = __importDefault(require("./typetalk/Typetalk"));
  * Tyoetalkオブジェクトのインスタンス
  */
 exports.typetalkApi = new Typetalk_1["default"]();
-},{"./typetalk/Typetalk":6}],9:[function(require,module,exports) {
-"use strict";
-
-var __importDefault = this && this.__importDefault || function (mod) {
-    return mod && mod.__esModule ? mod : { "default": mod };
-};
-exports.__esModule = true;
-var hyperapp_1 = require("hyperapp");
-var picostyle_1 = __importDefault(require("picostyle"));
-var _p;
-if (typeof picostyle_1["default"] !== "function") {
-    // tslint:disable-next-line:no-var-requires
-    var p = require("picostyle");
-    _p = p(hyperapp_1.h);
-} else {
-    _p = picostyle_1["default"](hyperapp_1.h);
-}
-exports.pstyle = _p;
-},{}],13:[function(require,module,exports) {
+},{"./typetalk/Typetalk":6}],15:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -409,7 +391,9 @@ exports.classNames = function (list) {
     });
     return result;
 };
-},{}],11:[function(require,module,exports) {
+},{}],16:[function(require,module,exports) {
+
+},{}],13:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -495,14 +479,7 @@ var _this = this;
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
 var Api_1 = require("../../Api");
-var picostyle_1 = require("../../polyfills/picostyle");
-var Wrapper = picostyle_1.pstyle("div")({
-    "line-height": "32px",
-    "display": "flex",
-    "textarea": {
-        "flex-grow": 1
-    }
-});
+require("./Input.css");
 exports["default"] = function (_a) {
     var actions = _a.actions,
         topic = _a.topic,
@@ -533,7 +510,7 @@ exports["default"] = function (_a) {
             });
         });
     };
-    return hyperapp_1.h(Wrapper, { oncreate: function (elm) {
+    return hyperapp_1.h("div", { "class": "Input", oncreate: function (elm) {
             elm.querySelector("textarea").focus();
         } }, hyperapp_1.h("textarea", { oninput: function (e) {
             localState.message = e.target.value;
@@ -555,7 +532,7 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
-},{"../../Api":3,"../../polyfills/picostyle":9}],12:[function(require,module,exports) {
+},{"../../Api":3,"./Input.css":16}],14:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -641,30 +618,7 @@ var _this = this;
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
 var Api_1 = require("../../Api");
-var picostyle_1 = require("../../polyfills/picostyle");
-var Wrapper = picostyle_1.pstyle("div")({
-    "display": "flex",
-    "div.thumbnail-container": {
-        width: "40px",
-        height: "40px",
-        img: {
-            width: "40px",
-            height: "40px"
-        }
-    },
-    "p": {
-        "font-size": "14px"
-    },
-    "p.post-message": {
-        "line-height": "16px"
-    },
-    "button.post-container": {
-        "padding": 0,
-        "background": "#fff",
-        "border": "none",
-        "text-align": "left"
-    }
-});
+require("./Post.css");
 exports["default"] = function (_a) {
     var post = _a.post,
         isObserve = _a.isObserve,
@@ -692,16 +646,16 @@ exports["default"] = function (_a) {
         });
         io.observe(elm);
     } : null;
-    return hyperapp_1.h(Wrapper, { oncreate: oncreate }, hyperapp_1.h("div", { "class": "thumbnail-container" }, hyperapp_1.h("img", { src: post.account.imageUrl, alt: post.account.fullName })), hyperapp_1.h("button", { type: "button", "class": "post-container", onclick: function () {
+    return hyperapp_1.h("div", { "class": "Post", oncreate: oncreate }, hyperapp_1.h("div", { "class": "Post__thumbnail-container" }, hyperapp_1.h("img", { src: post.account.imageUrl, alt: post.account.fullName })), hyperapp_1.h("button", { type: "button", "class": "Post__post-container", onclick: function () {
             console.log("onclick", post);
             if (view.replyInput === post.id) {
                 actions.replyInput(null);
             } else {
                 actions.replyInput(post.id);
             }
-        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "post-message" }, post.message)));
+        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message" }, post.message)));
 };
-},{"../../Api":3,"../../polyfills/picostyle":9}],7:[function(require,module,exports) {
+},{"../../Api":3,"./Post.css":16}],9:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -709,44 +663,15 @@ var __importDefault = this && this.__importDefault || function (mod) {
 };
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
-var picostyle_1 = require("../../polyfills/picostyle");
 var utils_1 = require("../../utils/utils");
 var Input_1 = __importDefault(require("../molecules/Input"));
 var Post_1 = __importDefault(require("../molecules/Post"));
-var Title = picostyle_1.pstyle("div")({
-    "line-height": "32px"
-});
-var Scroll = picostyle_1.pstyle("ul")({
-    "height": "calc(100vh - 32px - 32px)",
-    "overflow-x": "hidden",
-    "overflow-y": "auto",
-    "word-break": "break-word",
-    "li": {
-        "margin-bottom": "24px",
-        "position": "relative"
-    },
-    "li:last-child": {
-        "margin-bottom": "20px"
-    },
-    "div.reply-line": {
-        "border-left": "3px solid",
-        "bottom": "100%",
-        "left": "19px",
-        "position": "absolute",
-        "height": "0"
-    },
-    "div.reply-line--unconnected": {
-        "border-style": "dotted"
-    },
-    "div.reply": {
-        position: "absolute"
-    }
-});
+require("./PostList.css");
 exports["default"] = function (_a) {
     var list = _a.list,
         actions = _a.actions,
         view = _a.view;
-    return [hyperapp_1.h(Title, null, list.topic.name), hyperapp_1.h(Scroll, { oncreate: function (elm) {
+    return [hyperapp_1.h("div", { "class": "PostList__title" }, list.topic.name), hyperapp_1.h("ul", { "class": "PostList__scroll", oncreate: function (elm) {
             elm.scrollTop = Number.MAX_SAFE_INTEGER;
             var mo = new MutationObserver(function (mutations) {
                 console.log("mutations", elm.scrollHeight);
@@ -771,27 +696,27 @@ exports["default"] = function (_a) {
         } }, list.posts.map(function (post, i) {
         return hyperapp_1.h("li", { key: post.id, oncreate: function (elm) {
                 // draw reply line
-                if (elm.children[0].classList.contains("reply-line")) {
+                if (elm.children[0].classList.contains("PostList__reply-line--unconnected")) {
+                    elm.children[0].style.height = 10 + "px";
+                } else if (elm.children[0].classList.contains("PostList__reply-line")) {
                     var parent = elm.parentElement;
                     var replyTo = parent.children[i - 1];
                     var height = elm.offsetTop - replyTo.offsetTop - 40;
                     elm.children[0].style.height = height + "px";
-                } else if (elm.children[0].classList.contains("reply-line-unconnected")) {
-                    elm.children[0].style.height = 10 + "px";
                 }
             } }, function () {
             // draw reply line
             var prev = list.posts[i - 1];
             if (prev && post.replyTo === prev.id) {
                 // draw line
-                return hyperapp_1.h("div", { "class": "reply-line" });
+                return hyperapp_1.h("div", { "class": "PostList__reply-line" });
             } else if (post.replyTo) {
-                return hyperapp_1.h("div", { "class": "reply-line-unconnected" });
+                return hyperapp_1.h("div", { "class": "PostList__reply-line PostList__reply-line--unconnected" });
             }
         }(), hyperapp_1.h(Post_1["default"], { post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
-},{"../../polyfills/picostyle":9,"../../utils/utils":13,"../molecules/Input":11,"../molecules/Post":12}],8:[function(require,module,exports) {
+},{"../../utils/utils":15,"../molecules/Input":13,"../molecules/Post":14,"./PostList.css":16}],10:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -877,20 +802,7 @@ var _this = this;
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
 var Api_1 = require("../../Api");
-var picostyle_1 = require("../../polyfills/picostyle");
-var utils_1 = require("../../utils/utils");
-var Tablist = picostyle_1.pstyle("ul")({
-    "li.selected": {
-        button: {
-            color: "#ffa695"
-        }
-    }
-});
-var Scroll = picostyle_1.pstyle("ul")({
-    "li:last-child": {
-        "margin-bottom": "20px"
-    }
-});
+require("./TopicList.css");
 exports["default"] = function (_a) {
     var state = _a.state,
         actions = _a.actions;
@@ -907,11 +819,11 @@ exports["default"] = function (_a) {
             return [];
         }
     }();
-    return [hyperapp_1.h(Tablist, null, hyperapp_1.h("li", { "class": utils_1.classNames([state.view.tabName === "all" ? "selected" : null]) }, hyperapp_1.h("button", { type: "button", onclick: function () {
+    return [hyperapp_1.h("ul", null, hyperapp_1.h("li", null, hyperapp_1.h("button", { "class": state.view.tabName === "all" ? "TopicList__tablist--selected" : null, type: "button", onclick: function () {
             actions.tabName("all");
-        } }, "All")), hyperapp_1.h("li", { "class": utils_1.classNames([state.view.tabName === "favorites" ? "selected" : null]) }, hyperapp_1.h("button", { type: "button", onclick: function () {
+        } }, "All")), hyperapp_1.h("li", null, hyperapp_1.h("button", { "class": state.view.tabName === "favorites" ? "TopicList__tablist--selected" : null, type: "button", onclick: function () {
             actions.tabName("favorites");
-        } }, "Favorites"))), hyperapp_1.h(Scroll, null, visibleTopics.map(function (topic) {
+        } }, "Favorites"))), hyperapp_1.h("ul", { "class": "TopicList__list" }, visibleTopics.map(function (topic) {
         return hyperapp_1.h("li", null, hyperapp_1.h("button", { type: "button", onclick: function () {
                 return __awaiter(_this, void 0, void 0, function () {
                     var messageList;
@@ -929,7 +841,7 @@ exports["default"] = function (_a) {
             } }, topic.topic.name), hyperapp_1.h("span", null, topic.unread.count));
     }))];
 };
-},{"../../Api":3,"../../polyfills/picostyle":9,"../../utils/utils":13}],5:[function(require,module,exports) {
+},{"../../Api":3,"./TopicList.css":16}],5:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -937,34 +849,16 @@ var __importDefault = this && this.__importDefault || function (mod) {
 };
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
-var picostyle_1 = require("../../polyfills/picostyle");
 var PostList_1 = __importDefault(require("../organisms/PostList"));
 var TopicList_1 = __importDefault(require("../organisms/TopicList"));
-var Wrapper = picostyle_1.pstyle("div")({
-    "display": "flex",
-    "height": "100vh",
-    "overflow-x": "auto",
-    "overflow-y": "hidden",
-    "font-family": '"Open Sans",Hiragino Sans,Meiryo,Helvetica,Arial,sans-serif',
-    "div.topic-list": {
-        "height": "100vh",
-        "flex-basis": "300px",
-        "flex-shrink": 0,
-        "overflow-y": "auto",
-        "overflow-x": "hidden"
-    },
-    "div.post-list": {
-        "flex-basis": "400px",
-        "flex-shrink": 0
-    }
-});
+require("./Container.css");
 exports["default"] = function (state, actions) {
     console.log(state);
-    return hyperapp_1.h(Wrapper, null, hyperapp_1.h("style", null, "\n          body {\n            padding: 0;\n            margin: 0;\n          }\n\n          ul, p {\n            padding: 0;\n            margin: 0;\n          }\n\n          li {\n            list-style: none;\n          }\n        "), hyperapp_1.h("div", { "class": "topic-list" }, hyperapp_1.h(TopicList_1["default"], { state: state, actions: actions })), state.messageLists.map(function (list) {
-        return hyperapp_1.h("div", { "class": "post-list", key: list.topic.id }, hyperapp_1.h(PostList_1["default"], { list: list, actions: actions, view: state.view }));
+    return hyperapp_1.h("div", { "class": "Container" }, hyperapp_1.h("div", { "class": "Container__topic-list" }, hyperapp_1.h(TopicList_1["default"], { state: state, actions: actions })), state.messageLists.map(function (list) {
+        return hyperapp_1.h("div", { "class": "Container__post-list", key: list.topic.id }, hyperapp_1.h(PostList_1["default"], { list: list, actions: actions, view: state.view }));
     }));
 };
-},{"../../polyfills/picostyle":9,"../organisms/PostList":7,"../organisms/TopicList":8}],4:[function(require,module,exports) {
+},{"../organisms/PostList":9,"../organisms/TopicList":10,"./Container.css":16}],4:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;

@@ -1,0 +1,31 @@
+.PostList__title {
+  line-height: 32px;
+}
+
+.PostList__scroll {
+  height: calc(100vh - 32px - 32px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  word-break: break-word;
+}
+
+.PostList__scroll>li {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.PostList__scroll>li:last-child {
+  margin-bottom: 20px;
+}
+
+.PostList__reply-line {
+  border-left: 3px solid;
+  bottom: 100%;
+  left: 19px;
+  position: absolute;
+  height: 0;
+}
+
+.PostList__reply-line--unconnected {
+  border-style: dotted;
+}

@@ -1,0 +1,8 @@
+.Input {
+  line-height: 32px;
+  display: flex;
+}
+
+.Input textarea {
+  flex-grow: 1;
+}

@@ -1,0 +1,7 @@
+.TopicList__tablist--selected {
+  color: #ffa695;
+}
+
+.TopicList__list:last-child {
+  margin-bottom: 20px;
+}
