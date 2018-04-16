@@ -37,6 +37,11 @@
   text-align: left;
 }.PostList__title {
   line-height: 32px;
+  display: flex;
+}
+
+.PostList__topic-name {
+  flex-grow: 1;
 }
 
 .PostList__scroll {
@@ -66,7 +71,22 @@
 .PostList__reply-line--unconnected {
   border-style: dotted;
 }
-.TopicList__tablist--selected {
+.PostListMenu {
+  position: relative;
+}
+
+.PostListMenu__menu {
+  position: absolute;
+  z-index: 1;
+  background: rgb(100, 100, 100);
+  right: 0;
+  width: 200px;
+  text-align: right;
+}
+
+.PostListMenu--hide + .PostListMenu__menu {
+  display: none;
+}.TopicList__tablist--selected {
   color: #ffa695;
 }
 

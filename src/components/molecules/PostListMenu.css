@@ -1,0 +1,16 @@
+.PostListMenu {
+  position: relative;
+}
+
+.PostListMenu__menu {
+  position: absolute;
+  z-index: 1;
+  background: rgb(100, 100, 100);
+  right: 0;
+  width: 200px;
+  text-align: right;
+}
+
+.PostListMenu--hide + .PostListMenu__menu {
+  display: none;
+}

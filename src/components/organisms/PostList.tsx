@@ -6,11 +6,13 @@ import { isAddedToTop, node2Array } from "../../utils/utils";
 import Input from "../molecules/Input";
 import Post from "../molecules/Post";
 import "./PostList.css";
+import PostListMenu from "../molecules/PostListMenu";
 
 export default ({list, actions, view}: {list: IMessageList, actions: Actions, view: IView}) => {
   return [
     <div class="PostList__title">
-      {list.topic.name}
+      <span class="PostList__topic-name">{list.topic.name}</span>
+      <PostListMenu actions={actions} topic={list.topic} />
     </div>,
     <ul
       class="PostList__scroll"

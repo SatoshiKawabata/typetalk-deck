@@ -92,4 +92,21 @@ export default class Actions {
       actions.messageList(messageList);
     }
   }
+
+  removeMessageList = (topicId: number) => (state: IState, actions: Actions) => {
+    let idx;
+    state.messageLists.some((ml, i) => {
+      if (ml.topic.id === topicId) {
+        idx = i;
+        return true;
+      }
+    });
+    if (idx > -1) {
+      state.messageLists.splice(idx, 1);
+      return {
+        messageLists: state.messageLists
+      };
+    }
+    return {};
+  }
 }
