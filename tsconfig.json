@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "module": "commonjs",
+    "noUnusedLocals": true
+  }
+}
