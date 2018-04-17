@@ -18,6 +18,10 @@ export default ({post, isObserve, actions, view}: {post: IPost, isObserve: boole
       io.observe(elm);
     }
     : null;
+  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+  const newMessage = post.message.replace(urlRegex, (url: string) => {
+      return `<a href=${url} target="_blank">${url}</a>`;
+  });
   return (
     <div class="Post" oncreate={oncreate}>
       <div class="Post__thumbnail-container">
@@ -35,7 +39,7 @@ export default ({post, isObserve, actions, view}: {post: IPost, isObserve: boole
           }
         }}>
         <p>{post.account.fullName}</p>
-        <p class="Post__post-message">{post.message}</p>
+        <p class="Post__post-message" innerHTML={newMessage}></p>
       </button>
     </div>
   );
