@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({7:[function(require,module,exports) {
+})({8:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -147,7 +147,7 @@ var Actions = /** @class */function () {
             return function (state, actions) {
                 var index = Actions.getMessageListIndex(messageList.topic.id, state);
                 if (state.messageLists[index]) {
-                    // postsのマージ
+                    // merge posts
                     var oldPosts = state.messageLists[index].posts;
                     var newPosts_1 = messageList.posts;
                     var willAdd_1 = [];
@@ -221,6 +221,35 @@ var Actions = /** @class */function () {
                 return { selfProfile: profile };
             };
         };
+        this.dragstart = function (messageList) {
+            return function (state, actions) {
+                state.view.draggingMessageList = messageList;
+                return {
+                    view: state.view
+                };
+            };
+        };
+        this.drop = function (messageList) {
+            return function (state, actions) {
+                if (state.view.draggingMessageList) {
+                    var from = state.messageLists.indexOf(state.view.draggingMessageList);
+                    var to = state.messageLists.indexOf(messageList);
+                    state.messageLists[to] = state.view.draggingMessageList;
+                    state.messageLists[from] = messageList;
+                    return {
+                        messageLists: state.messageLists
+                    };
+                }
+            };
+        };
+        this.dragend = function () {
+            return function (state, actions) {
+                state.view.draggingMessageList = null;
+                return {
+                    view: state.view
+                };
+            };
+        };
     }
     Actions.getMessageListIndex = function (topicId, state) {
         var index = -1;
@@ -235,7 +264,7 @@ var Actions = /** @class */function () {
     return Actions;
 }();
 exports["default"] = Actions;
-},{"./models/view":7}],11:[function(require,module,exports) {
+},{"./models/view":8}],10:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -276,7 +305,7 @@ exports.StreamingEvent = {
     UPDATE_TALK: "updateTalk",
     UPDATE_TOPIC: "updateTopic"
 };
-},{}],6:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -428,7 +457,7 @@ var TypeTalk = /** @class */function () {
     return TypeTalk;
 }();
 exports["default"] = TypeTalk;
-},{"./Streaming":11}],3:[function(require,module,exports) {
+},{"./Streaming":10}],3:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -440,7 +469,7 @@ var Typetalk_1 = __importDefault(require("./typetalk/Typetalk"));
  * Tyoetalkオブジェクトのインスタンス
  */
 exports.typetalkApi = new Typetalk_1["default"]();
-},{"./typetalk/Typetalk":6}],17:[function(require,module,exports) {
+},{"./typetalk/Typetalk":7}],19:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -476,9 +505,9 @@ exports.getPost = function (state, topicId, postId) {
         return null;
     }
 };
-},{}],18:[function(require,module,exports) {
+},{}],20:[function(require,module,exports) {
 
-},{}],14:[function(require,module,exports) {
+},{}],16:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -617,7 +646,7 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
-},{"../../Api":3,"./Input.css":18}],20:[function(require,module,exports) {
+},{"../../Api":3,"./Input.css":20}],22:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -759,7 +788,7 @@ var setLike = function (post, profile, isLike) {
         });
     }
 };
-},{"../../Api":3,"./LikeToggle.css":18,"../../utils/utils":17}],15:[function(require,module,exports) {
+},{"../../Api":3,"./LikeToggle.css":20,"../../utils/utils":19}],17:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -886,7 +915,7 @@ exports["default"] = function (_a) {
             }
         } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message" }, post.message)), hyperapp_1.h(LikeToggle_1["default"], { state: state, actions: actions, post: post }));
 };
-},{"../../Api":3,"./Post.css":18,"../atoms/LikeToggle":20}],16:[function(require,module,exports) {
+},{"../../Api":3,"./Post.css":20,"../atoms/LikeToggle":22}],18:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -906,7 +935,7 @@ exports["default"] = function (_a) {
             actions.removeMessageList(topic.id);
         } }, "Remove this topic")))));
 };
-},{"./PostListMenu.css":18}],9:[function(require,module,exports) {
+},{"./PostListMenu.css":20}],12:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -968,7 +997,7 @@ exports["default"] = function (_a) {
         }(), hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
-},{"../../utils/utils":17,"../molecules/Input":14,"../molecules/Post":15,"./PostList.css":18,"../molecules/PostListMenu":16}],10:[function(require,module,exports) {
+},{"../../utils/utils":19,"../molecules/Input":16,"../molecules/Post":17,"./PostList.css":20,"../molecules/PostListMenu":18}],13:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -1093,7 +1122,7 @@ exports["default"] = function (_a) {
             } }, topic.topic.name), hyperapp_1.h("span", null, topic.unread.count));
     }))];
 };
-},{"../../Api":3,"./TopicList.css":18}],5:[function(require,module,exports) {
+},{"../../Api":3,"./TopicList.css":20}],5:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1108,10 +1137,20 @@ exports["default"] = function (state, actions) {
     console.log("state", state);
     return hyperapp_1.h("div", { "class": "Container" }, hyperapp_1.h("div", { "class": "Container__topic-list" }, hyperapp_1.h(TopicList_1["default"], { state: state, actions: actions })), state.messageLists.map(function (list) {
         var column = state.view.columns[list.topic.id];
-        return hyperapp_1.h("div", { "class": "Container__post-list", key: list.topic.id, style: "flex-basis: " + column.width + "px" }, hyperapp_1.h(PostList_1["default"], { list: list, state: state, actions: actions, view: state.view }));
+        return hyperapp_1.h("div", { draggable: true, ondragstart: function (e) {
+                actions.dragstart(list);
+            }, ondrop: function (e) {
+                actions.drop(list);
+            }, ondragend: function (e) {
+                actions.dragend();
+            }, ondragenter: function (e) {
+                e.preventDefault();
+            }, ondragover: function (e) {
+                e.preventDefault();
+            }, "class": "Container__post-list", key: list.topic.id, style: "flex-basis: " + column.width + "px" }, hyperapp_1.h(PostList_1["default"], { list: list, state: state, actions: actions, view: state.view }));
     }));
 };
-},{"../organisms/PostList":9,"../organisms/TopicList":10,"./Container.css":18}],4:[function(require,module,exports) {
+},{"../organisms/PostList":12,"../organisms/TopicList":13,"./Container.css":20}],4:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;

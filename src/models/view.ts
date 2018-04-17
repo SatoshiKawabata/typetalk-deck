@@ -1,3 +1,5 @@
+import { IMessageList } from "../typetalk/Models";
+
 export type TabName = "all" | "favorites";
 
 /**
@@ -15,6 +17,7 @@ export const defaultColumn = (): IColumn => {
 
 export interface IView {
   tabName: TabName;
-  replyInput: number; // 返信用UIを表示するpostId
-  columns: { [key: number]: IColumn}; // topicIdがキー
+  replyInput: number; // to show reply input UI
+  columns: { [key: number]: IColumn}; // key: topicId
+  draggingMessageList: IMessageList;
 }

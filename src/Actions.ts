@@ -1,5 +1,5 @@
 import { IState } from "./State";
-import { IMessageList, IPost, ITopics, IProfile } from "./typetalk/Models";
+import { IMessageList, IPost, ITopics, IProfile, ITopic } from "./typetalk/Models";
 import { TabName, defaultColumn } from "./models/view";
 
 /**
@@ -64,7 +64,7 @@ export default class Actions {
   messageList = (messageList: IMessageList) => (state: IState, actions: Actions) => {
     const index = Actions.getMessageListIndex(messageList.topic.id, state);
     if (state.messageLists[index]) {
-      // postsのマージ
+      // merge posts
       const oldPosts = state.messageLists[index].posts;
       const newPosts = messageList.posts;
       const willAdd = [];
@@ -129,4 +129,30 @@ export default class Actions {
   selfProfile = (profile: IProfile) => (state: IState, actions: Actions) => {
     return { selfProfile: profile };
   };
+
+  dragstart = (messageList: IMessageList) => (state: IState, actions: Actions) => {
+    state.view.draggingMessageList = messageList;
+    return {
+      view: state.view
+    };
+  }
+
+  drop = (messageList: IMessageList) => (state: IState, actions: Actions) => {
+    if (state.view.draggingMessageList) {
+      const from = state.messageLists.indexOf(state.view.draggingMessageList);
+      const to = state.messageLists.indexOf(messageList);
+      state.messageLists[to] = state.view.draggingMessageList;
+      state.messageLists[from] = messageList;
+      return {
+        messageLists: state.messageLists
+      };
+    }
+  }
+
+  dragend = () => (state: IState, actions: Actions) => {
+    state.view.draggingMessageList = null;
+    return {
+      view: state.view
+    };
+  }
 }
