@@ -1,14 +1,15 @@
 import { h } from "hyperapp";
 import Actions from "../../Actions";
-import { IView } from "../../State";
+import { IState } from "../../State";
 import { IMessageList } from "../../typetalk/Models";
 import { isAddedToTop, node2Array } from "../../utils/utils";
 import Input from "../molecules/Input";
 import Post from "../molecules/Post";
 import "./PostList.css";
 import PostListMenu from "../molecules/PostListMenu";
+import { IView } from "../../models/view";
 
-export default ({list, actions, view}: {list: IMessageList, actions: Actions, view: IView}) => {
+export default ({state, list, actions, view}: {state: IState, list: IMessageList, actions: Actions, view: IView}) => {
   return [
     <div class="PostList__title">
       <span class="PostList__topic-name">{list.topic.name}</span>
@@ -19,7 +20,6 @@ export default ({list, actions, view}: {list: IMessageList, actions: Actions, vi
       oncreate={(elm: HTMLElement) => {
         elm.scrollTop = Number.MAX_SAFE_INTEGER;
         const mo = new MutationObserver(mutations => {
-          console.log("mutations", elm.scrollHeight);
           let addedHeight = 0;
           const isTop = isAddedToTop(mutations.map(m => m.addedNodes[0]), elm.childNodes);
           if (isTop) {
@@ -63,7 +63,7 @@ export default ({list, actions, view}: {list: IMessageList, actions: Actions, vi
                 return <div class="PostList__reply-line PostList__reply-line--unconnected"></div>;
               }
             })()}
-            <Post post={post} isObserve={i === 0} actions={actions} view={view} />
+            <Post state={state} post={post} isObserve={i === 0} actions={actions} view={view} />
             {view.replyInput === post.id
               ? <Input actions={actions} topic={list.topic} replyTo={view.replyInput}/>
               : null}

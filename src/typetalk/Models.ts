@@ -1,3 +1,4 @@
+import { IAccount } from "./Models";
 export interface IAccessToken {
   access_token: string;
   token_type: string;
@@ -6,7 +7,7 @@ export interface IAccessToken {
 }
 
 export interface IProfile {
-  account: Account;
+  account: IAccount;
 }
 
 export interface ITopic {
@@ -112,7 +113,7 @@ export interface IPost {
   account: IAccount;
   mention: string;
   attachments: IAttachment[];
-  likes: string[];
+  likes: IProfile[];
   talks: string[];
   links: Array<{
     id: number;
@@ -148,4 +149,15 @@ export interface ISpace {
   name: string;
   enabled: boolean;
   imageUrl: string;
+}
+
+export interface ILike {
+  like: {
+    id: number;
+    postId: number;
+    topicId: number;
+    comment: string;
+    account: IAccount;
+    createdAt: string;
+  }
 }

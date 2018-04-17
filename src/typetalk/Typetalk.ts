@@ -1,5 +1,5 @@
 import * as querystring from "querystring";
-import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics } from "./Models";
+import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics, ILike } from "./Models";
 import Streaming, { IStreaming, StreamingEvent } from "./Streaming";
 
 const secret = querystring.parse(location.search.split("?")[1]);
@@ -89,6 +89,14 @@ export default class TypeTalk {
     });
   }
 
+  like(topicId: number, postId: number) {
+    return this.postMethod<ILike>(`https://typetalk.com/api/v1/topics/${topicId}/posts/${postId}/like`, {});
+  }
+
+  unlike(topicId: number, postId: number) {
+    return this.deleteMethod<ILike>(`https://typetalk.com/api/v1/topics/${topicId}/posts/${postId}/like`, {});
+  }
+
   private postMethod = <T>(url: string, param: any): Promise<T> => {
     return new Promise<T>((res, rej) => {
       const xhr = new XMLHttpRequest();
@@ -128,6 +136,28 @@ export default class TypeTalk {
         );
       }
       xhr.send();
+      return xhr;
+    });
+  }
+
+  private deleteMethod = <T>(url: string, param: any): Promise<T> => {
+    return new Promise<T>((res, rej) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = () => {
+        res(JSON.parse(xhr.response));
+      };
+      xhr.onerror = () => {
+        rej(JSON.parse(xhr.response));
+      };
+      xhr.open("DELETE", url);
+      if (this.token) {
+        xhr.setRequestHeader(
+          "Authorization",
+          `Bearer ${this.token.access_token}`
+        );
+      }
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.send(JSON.stringify(param));
       return xhr;
     });
   }

@@ -1,13 +1,8 @@
-import { IMessageList, IReplies, ITopics } from "./typetalk/Models";
-
-export type TabName = "all" | "favorites";
-
-export interface IView {
-  tabName: TabName;
-  replyInput: number; // postId
-}
+import { IMessageList, IReplies, ITopics, IProfile } from "./typetalk/Models";
+import { IView } from "./models/view";
 
 export interface IState {
+  selfProfile: IProfile;
   topics: ITopics;
   messageLists: IMessageList[];
   replies: IReplies;
@@ -19,11 +14,13 @@ export interface IState {
  * 一個のでっかいJSON
  */
 export const state: IState = {
+  selfProfile: null,
   messageLists: [],
   topics: null,
   replies: null,
   view: {
     tabName: "favorites",
-    replyInput: null
+    replyInput: null,
+    columns: {}
   }
 };
