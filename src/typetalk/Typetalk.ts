@@ -19,6 +19,10 @@ export default class TypeTalk {
     this.streamingHandlers = new Map();
   }
 
+  getAuthUrl() {
+    return "https://typetalk.com/oauth2/authorize?client_id="+CLIENT_ID+"&scope=my,topic.read,topic.post&redirect_uri=http://localhost&response_type=code";
+  }
+
   setToken(token: IAccessToken) {
     this.token = token;
     localStorage.setItem("auth_token", JSON.stringify(this.token));
