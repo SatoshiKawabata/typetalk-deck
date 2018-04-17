@@ -1,5 +1,5 @@
 import * as querystring from "querystring";
-import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics, ILike } from "./Models";
+import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics, ILike, IAttachment } from "./Models";
 import Streaming, { IStreaming, StreamingEvent, IpostMessage } from "./Streaming";
 const request = require('request');
 
@@ -153,9 +153,35 @@ export default class TypeTalk {
     return this.deleteMethod<ILike>(`https://typetalk.com/api/v1/topics/${topicId}/posts/${postId}/like`, {});
   }
   tryConnect(connect: Function) {
-    return connect().catch(() => 
+    return connect().catch(() =>
       this.getNewToken().then(() => connect())
     )
+  }
+
+  downloadAttachment(attachment: IAttachment) {
+    return new Promise<any>((res, rej) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = () => {
+        res(xhr.response);
+      };
+      xhr.onerror = () => {
+        rej(xhr.response);
+      };
+      const query = {} as any;
+      if (attachment.attachment.contentType.indexOf("image") > -1) {
+        query.type = "small";
+      }
+      xhr.open("GET", `${attachment.apiUrl}?${querystring.stringify(query)}`);
+      if (this.token) {
+        xhr.setRequestHeader(
+          "Authorization",
+          `Bearer ${this.token.access_token}`
+        );
+      }
+      xhr.responseType = "blob";
+      xhr.send();
+      return xhr;
+    });
   }
 
   private postMethod = <T>(url: string, param: any): Promise<T> => {

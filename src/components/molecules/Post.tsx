@@ -7,6 +7,7 @@ import { IPost } from "../../typetalk/Models";
 import "./Post.css";
 import LikeToggle from "../atoms/LikeToggle";
 import { IView } from "../../models/view";
+import Attachments from "../atoms/Attachments";
 
 const converter = new showdown.Converter();
 const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
@@ -38,7 +39,7 @@ export default ({state, post, isObserve, actions, view}: {state: IState, post: I
       });
   }
 
-  return (
+  return [
     <div class="Post" oncreate={oncreate}>
       <div class="Post__thumbnail-container">
         <img src={post.account.imageUrl} alt={post.account.fullName} />
@@ -59,6 +60,9 @@ export default ({state, post, isObserve, actions, view}: {state: IState, post: I
         <p class="Post__post-message" innerHTML={newMessage}></p>
       </button>
       <LikeToggle state={state} actions={actions} post={post} />
-    </div>
-  );
+    </div>,
+      post.attachments.length > 0
+        ? <Attachments state={state} post={post} actions={actions} />
+        : null
+  ];
 };

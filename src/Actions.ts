@@ -1,5 +1,5 @@
 import { IState } from "./State";
-import { IMessageList, IPost, ITopics, IProfile, ITopic } from "./typetalk/Models";
+import { IMessageList, IPost, ITopics, IProfile } from "./typetalk/Models";
 import { TabName, defaultColumn } from "./models/view";
 import { location } from "@hyperapp/router"
 
@@ -169,6 +169,13 @@ export default class Actions {
     state.view.draggingMessageList = null;
     return {
       view: state.view
+    };
+  }
+
+  addAttachment = ({ url, uri }: { url: string, uri: string }) => (state: IState, actions: Actions) => {
+    state.attachmentMap[url] = uri;
+    return {
+      attachmentMap: state.attachmentMap
     };
   }
 }

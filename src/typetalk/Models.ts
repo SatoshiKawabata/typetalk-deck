@@ -80,7 +80,7 @@ export interface IAccount {
   updatedAt: string;
 }
 
-interface IAttachment {
+export interface IAttachment {
   attachment: {
     contentType: string;
     fileKey: string;

@@ -10,6 +10,7 @@ export interface IState {
   view: IView;
   location: any;
   login: boolean;
+  attachmentMap: { [key: string]: any}; // attachment data uri(key: attachment.apiUrl)
 }
 
 /**
@@ -29,5 +30,6 @@ export const state: IState = {
     columns: {},
     showThread: null,
     draggingMessageList: null
-  }
+  },
+  attachmentMap: {}
 };
