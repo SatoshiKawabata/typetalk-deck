@@ -18,6 +18,7 @@ export const defaultColumn = (): IColumn => {
 export interface IView {
   tabName: TabName;
   replyInput: number; // to show reply input UI
+  showThread: number;
   columns: { [key: number]: IColumn}; // key: topicId
   draggingMessageList: IMessageList;
 }

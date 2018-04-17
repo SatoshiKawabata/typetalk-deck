@@ -21,6 +21,7 @@ export const state: IState = {
   view: {
     tabName: "favorites",
     replyInput: null,
-    columns: {}
+    columns: {},
+    showThread: false,
   }
 };

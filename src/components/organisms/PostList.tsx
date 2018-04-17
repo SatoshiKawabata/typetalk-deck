@@ -8,6 +8,7 @@ import Post from "../molecules/Post";
 import "./PostList.css";
 import PostListMenu from "../molecules/PostListMenu";
 import { IView } from "../../models/view";
+import ThreadPost from "../molecules/ThreadPost";
 
 export default ({state, list, actions, view}: {state: IState, list: IMessageList, actions: Actions, view: IView}) => {
   return [
@@ -63,6 +64,7 @@ export default ({state, list, actions, view}: {state: IState, list: IMessageList
                 return <div class="PostList__reply-line PostList__reply-line--unconnected"></div>;
               }
             })()}
+            {view.showThread === post.id ? <ThreadPost state={state} listPost={list.posts} post={post} isObserve={i === 0} actions={actions} view={view}/> : null}
             <Post state={state} post={post} isObserve={i === 0} actions={actions} view={view} />
             {view.replyInput === post.id
               ? <Input actions={actions} topic={list.topic} replyTo={view.replyInput}/>

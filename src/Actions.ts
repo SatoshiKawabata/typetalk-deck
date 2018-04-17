@@ -38,6 +38,13 @@ export default class Actions {
     };
   }
 
+  toggleShowThread = (postId: number) => (state: IState, actions: Actions) => {
+    state.view.showThread = postId;
+    return {
+      view: state.view,
+    };
+  }
+
   unshiftMessageList = (messageList: IMessageList) => (state: IState, actions: Actions) => {
     let idx;
     const list = state.messageLists.find((l, i) => {

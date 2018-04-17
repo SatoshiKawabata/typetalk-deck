@@ -35,8 +35,10 @@ export default ({state, post, isObserve, actions, view}: {state: IState, post: I
         onclick={() => {
           if (view.replyInput === post.id) {
             actions.replyInput(null);
+            actions.toggleShowThread(null);
           } else {
             actions.replyInput(post.id);
+            actions.toggleShowThread(post.id);
           }
         }}>
         <p>{post.account.fullName}</p>
