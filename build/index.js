@@ -77,7 +77,7 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({8:[function(require,module,exports) {
+})({7:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -114,6 +114,14 @@ var Actions = /** @class */function () {
         this.replyInput = function (replyTo) {
             return function (state, actions) {
                 state.view.replyInput = replyTo;
+                return {
+                    view: state.view
+                };
+            };
+        };
+        this.toggleShowThread = function (postId) {
+            return function (state, actions) {
+                state.view.showThread = postId;
                 return {
                     view: state.view
                 };
@@ -264,7 +272,7 @@ var Actions = /** @class */function () {
     return Actions;
 }();
 exports["default"] = Actions;
-},{"./models/view":8}],10:[function(require,module,exports) {
+},{"./models/view":7}],11:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -305,7 +313,7 @@ exports.StreamingEvent = {
     UPDATE_TALK: "updateTalk",
     UPDATE_TOPIC: "updateTopic"
 };
-},{}],7:[function(require,module,exports) {
+},{}],6:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -457,7 +465,7 @@ var TypeTalk = /** @class */function () {
     return TypeTalk;
 }();
 exports["default"] = TypeTalk;
-},{"./Streaming":10}],3:[function(require,module,exports) {
+},{"./Streaming":11}],3:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -469,7 +477,7 @@ var Typetalk_1 = __importDefault(require("./typetalk/Typetalk"));
  * Tyoetalkオブジェクトのインスタンス
  */
 exports.typetalkApi = new Typetalk_1["default"]();
-},{"./typetalk/Typetalk":7}],19:[function(require,module,exports) {
+},{"./typetalk/Typetalk":6}],18:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -505,9 +513,9 @@ exports.getPost = function (state, topicId, postId) {
         return null;
     }
 };
-},{}],20:[function(require,module,exports) {
+},{}],19:[function(require,module,exports) {
 
-},{}],16:[function(require,module,exports) {
+},{}],13:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -646,7 +654,7 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
-},{"../../Api":3,"./Input.css":20}],22:[function(require,module,exports) {
+},{"../../Api":3,"./Input.css":19}],22:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -788,7 +796,7 @@ var setLike = function (post, profile, isLike) {
         });
     }
 };
-},{"../../Api":3,"./LikeToggle.css":20,"../../utils/utils":19}],17:[function(require,module,exports) {
+},{"../../Api":3,"./LikeToggle.css":19,"../../utils/utils":18}],14:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -907,15 +915,21 @@ exports["default"] = function (_a) {
         });
         io.observe(elm);
     } : null;
+    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    var newMessage = post.message.replace(urlRegex, function (url) {
+        return "<a href=" + url + " target=\"_blank\">" + url + "</a>";
+    });
     return hyperapp_1.h("div", { "class": "Post", oncreate: oncreate }, hyperapp_1.h("div", { "class": "Post__thumbnail-container" }, hyperapp_1.h("img", { src: post.account.imageUrl, alt: post.account.fullName })), hyperapp_1.h("button", { type: "button", "class": "Post__post-container", onclick: function () {
             if (view.replyInput === post.id) {
                 actions.replyInput(null);
+                actions.toggleShowThread(null);
             } else {
                 actions.replyInput(post.id);
+                actions.toggleShowThread(post.id);
             }
-        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message" }, post.message)), hyperapp_1.h(LikeToggle_1["default"], { state: state, actions: actions, post: post }));
+        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message", innerHTML: newMessage })), hyperapp_1.h(LikeToggle_1["default"], { state: state, actions: actions, post: post }));
 };
-},{"../../Api":3,"./Post.css":20,"../atoms/LikeToggle":22}],18:[function(require,module,exports) {
+},{"../../Api":3,"./Post.css":19,"../atoms/LikeToggle":22}],15:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -935,7 +949,45 @@ exports["default"] = function (_a) {
             actions.removeMessageList(topic.id);
         } }, "Remove this topic")))));
 };
-},{"./PostListMenu.css":20}],12:[function(require,module,exports) {
+},{"./PostListMenu.css":19}],16:[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+    return mod && mod.__esModule ? mod : { "default": mod };
+};
+exports.__esModule = true;
+var hyperapp_1 = require("hyperapp");
+require("./ThreadPost.css");
+var Post_1 = __importDefault(require("./Post"));
+exports["default"] = function (_a) {
+    var state = _a.state,
+        listPost = _a.listPost,
+        post = _a.post,
+        isObserve = _a.isObserve,
+        actions = _a.actions,
+        view = _a.view;
+    var threadPostList = [];
+    var currentReplyTo = post.replyTo;
+    while (currentReplyTo) {
+        for (var _i = 0, listPost_1 = listPost; _i < listPost_1.length; _i++) {
+            var p = listPost_1[_i];
+            if (p.id === currentReplyTo) {
+                threadPostList.unshift(p);
+                currentReplyTo = p.replyTo;
+                break;
+            }
+        }
+    }
+    return hyperapp_1.h("div", { "class": "ThreadPost" }, threadPostList.map(function (thread, i) {
+        return hyperapp_1.h("div", { "class": "ThreadPost__container" }, hyperapp_1.h(Post_1["default"], { state: state, post: thread, isObserve: isObserve, actions: actions, view: view }), function (p) {
+            // draw reply line
+            if (p.replyTo) {
+                return hyperapp_1.h("div", { className: "PostList__reply-line" });
+            }
+        }(thread));
+    }));
+};
+},{"./ThreadPost.css":19,"./Post":14}],9:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -948,6 +1000,7 @@ var Input_1 = __importDefault(require("../molecules/Input"));
 var Post_1 = __importDefault(require("../molecules/Post"));
 require("./PostList.css");
 var PostListMenu_1 = __importDefault(require("../molecules/PostListMenu"));
+var ThreadPost_1 = __importDefault(require("../molecules/ThreadPost"));
 exports["default"] = function (_a) {
     var state = _a.state,
         list = _a.list,
@@ -994,10 +1047,10 @@ exports["default"] = function (_a) {
             } else if (post.replyTo) {
                 return hyperapp_1.h("div", { "class": "PostList__reply-line PostList__reply-line--unconnected" });
             }
-        }(), hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
+        }(), view.showThread === post.id ? hyperapp_1.h(ThreadPost_1["default"], { state: state, listPost: list.posts, post: post, isObserve: i === 0, actions: actions, view: view }) : null, hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
-},{"../../utils/utils":19,"../molecules/Input":16,"../molecules/Post":17,"./PostList.css":20,"../molecules/PostListMenu":18}],13:[function(require,module,exports) {
+},{"../../utils/utils":18,"../molecules/Input":13,"../molecules/Post":14,"./PostList.css":19,"../molecules/PostListMenu":15,"../molecules/ThreadPost":16}],10:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -1122,7 +1175,7 @@ exports["default"] = function (_a) {
             } }, topic.topic.name), hyperapp_1.h("span", null, topic.unread.count));
     }))];
 };
-},{"../../Api":3,"./TopicList.css":20}],5:[function(require,module,exports) {
+},{"../../Api":3,"./TopicList.css":19}],5:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1150,7 +1203,7 @@ exports["default"] = function (state, actions) {
             }, "class": "Container__post-list", key: list.topic.id, style: "flex-basis: " + column.width + "px" }, hyperapp_1.h(PostList_1["default"], { list: list, state: state, actions: actions, view: state.view }));
     }));
 };
-},{"../organisms/PostList":12,"../organisms/TopicList":13,"./Container.css":20}],4:[function(require,module,exports) {
+},{"../organisms/PostList":9,"../organisms/TopicList":10,"./Container.css":19}],4:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -1166,7 +1219,9 @@ exports.state = {
     view: {
         tabName: "favorites",
         replyInput: null,
-        columns: {}
+        columns: {},
+        showThread: null,
+        draggingMessageList: null
     }
 };
 },{}],1:[function(require,module,exports) {
