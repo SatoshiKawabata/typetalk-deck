@@ -1,16 +1,71 @@
+/* each topic menu style */
 .PostListMenu {
   position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1px;
+  padding-right: 5px;
+}
+.PostListMenu>button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: rgba(0,0,0,0);
+}
+.PostListMenu>button::before {
+  transform: rotate(315deg);
+  transform-origin: center;
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ffa695;
+  content: '';
+  z-index: 10;
+  transition: all .2s ease;
+}
+.PostListMenu>button::after {
+  transform: rotate(-315deg);
+  transform-origin: center;
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ffa695;
+  content: '';
+  z-index: 10;
+  transition: all .2s ease;
+}
+.PostListMenu>button.PostListMenu--hide::before {
+  transform: rotate(0deg);
+  top: 5px;
+}
+.PostListMenu>button.PostListMenu--hide::after {
+  transform: rotate(0deg);
+  bottom: 5px;
 }
 
 .PostListMenu__menu {
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
   background: rgb(100, 100, 100);
+  background: #ffa695;
+  top: 32px;
   right: 0;
-  width: 200px;
+  width: 400px;
+  padding: 5px;
   text-align: right;
 }
-
+.PostListMenu__menu button {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #fff;
+}
 .PostListMenu--hide + .PostListMenu__menu {
   display: none;
 }
