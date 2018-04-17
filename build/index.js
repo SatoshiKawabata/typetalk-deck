@@ -77,10 +77,20 @@ parcelRequire = (function (modules, cache, entry) {
 
   // Override the current require with this new one
   return newRequire;
-})({2:[function(require,module,exports) {
+})({8:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
+exports.defaultColumn = function () {
+    return {
+        width: 400
+    };
+};
+},{}],2:[function(require,module,exports) {
+"use strict";
+
+exports.__esModule = true;
+var view_1 = require("./models/view");
 /**
  * APIの呼び出しはコンポーネント側で行い、ActionsではStateへの変更するだけに留めるのがいいのではないかと思っている
  */
@@ -125,8 +135,10 @@ var Actions = /** @class */function () {
                         messageLists: state.messageLists
                     };
                 } else {
+                    state.view.columns[messageList.topic.id] = view_1.defaultColumn();
                     return {
-                        messageLists: [messageList].concat(state.messageLists)
+                        messageLists: [messageList].concat(state.messageLists),
+                        view: state.view
                     };
                 }
             };
@@ -135,7 +147,7 @@ var Actions = /** @class */function () {
             return function (state, actions) {
                 var index = Actions.getMessageListIndex(messageList.topic.id, state);
                 if (state.messageLists[index]) {
-                    // postsのマージ
+                    // merge posts
                     var oldPosts = state.messageLists[index].posts;
                     var newPosts_1 = messageList.posts;
                     var willAdd_1 = [];
@@ -172,6 +184,20 @@ var Actions = /** @class */function () {
                 }
             };
         };
+        this.updatePost = function (post) {
+            return function (state, actions) {
+                var ml = state.messageLists.find(function (ml) {
+                    return ml.topic.id === post.topicId;
+                });
+                ml && ml.posts.some(function (p, i) {
+                    if (p.id === post.id) {
+                        ml.posts[i] = p;
+                        return true;
+                    }
+                });
+                actions.messageList(ml);
+            };
+        };
         this.removeMessageList = function (topicId) {
             return function (state, actions) {
                 var idx;
@@ -190,6 +216,40 @@ var Actions = /** @class */function () {
                 return {};
             };
         };
+        this.selfProfile = function (profile) {
+            return function (state, actions) {
+                return { selfProfile: profile };
+            };
+        };
+        this.dragstart = function (messageList) {
+            return function (state, actions) {
+                state.view.draggingMessageList = messageList;
+                return {
+                    view: state.view
+                };
+            };
+        };
+        this.drop = function (messageList) {
+            return function (state, actions) {
+                if (state.view.draggingMessageList) {
+                    var from = state.messageLists.indexOf(state.view.draggingMessageList);
+                    var to = state.messageLists.indexOf(messageList);
+                    state.messageLists[to] = state.view.draggingMessageList;
+                    state.messageLists[from] = messageList;
+                    return {
+                        messageLists: state.messageLists
+                    };
+                }
+            };
+        };
+        this.dragend = function () {
+            return function (state, actions) {
+                state.view.draggingMessageList = null;
+                return {
+                    view: state.view
+                };
+            };
+        };
     }
     Actions.getMessageListIndex = function (topicId, state) {
         var index = -1;
@@ -204,7 +264,7 @@ var Actions = /** @class */function () {
     return Actions;
 }();
 exports["default"] = Actions;
-},{}],10:[function(require,module,exports) {
+},{"./models/view":8}],10:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -245,7 +305,7 @@ exports.StreamingEvent = {
     UPDATE_TALK: "updateTalk",
     UPDATE_TOPIC: "updateTopic"
 };
-},{}],6:[function(require,module,exports) {
+},{}],7:[function(require,module,exports) {
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -305,6 +365,24 @@ var TypeTalk = /** @class */function () {
                     xhr.setRequestHeader("Authorization", "Bearer " + _this.token.access_token);
                 }
                 xhr.send();
+                return xhr;
+            });
+        };
+        this.deleteMethod = function (url, param) {
+            return new Promise(function (res, rej) {
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    res(JSON.parse(xhr.response));
+                };
+                xhr.onerror = function () {
+                    rej(JSON.parse(xhr.response));
+                };
+                xhr.open("DELETE", url);
+                if (_this.token) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + _this.token.access_token);
+                }
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify(param));
                 return xhr;
             });
         };
@@ -370,6 +448,12 @@ var TypeTalk = /** @class */function () {
             // }
         });
     };
+    TypeTalk.prototype.like = function (topicId, postId) {
+        return this.postMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
+    };
+    TypeTalk.prototype.unlike = function (topicId, postId) {
+        return this.deleteMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
+    };
     return TypeTalk;
 }();
 exports["default"] = TypeTalk;
@@ -385,7 +469,7 @@ var Typetalk_1 = __importDefault(require("./typetalk/Typetalk"));
  * Tyoetalkオブジェクトのインスタンス
  */
 exports.typetalkApi = new Typetalk_1["default"]();
-},{"./typetalk/Typetalk":6}],16:[function(require,module,exports) {
+},{"./typetalk/Typetalk":7}],19:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -409,9 +493,21 @@ exports.classNames = function (list) {
     });
     return result;
 };
-},{}],17:[function(require,module,exports) {
+exports.getPost = function (state, topicId, postId) {
+    var ml = state.messageLists.find(function (ml) {
+        return ml.topic.id === topicId;
+    });
+    if (ml) {
+        return ml.posts.find(function (p, i) {
+            return p.id === postId;
+        });
+    } else {
+        return null;
+    }
+};
+},{}],20:[function(require,module,exports) {
 
-},{}],13:[function(require,module,exports) {
+},{}],16:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -550,22 +646,149 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
-},{"../../Api":3,"./Input.css":17}],20:[function(require,module,exports) {
+},{"../../Api":3,"./Input.css":20}],22:[function(require,module,exports) {
 "use strict";
 
+var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = this && this.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function () {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t,
+        g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+        return this;
+    }), g;
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0:case 1:
+                    t = op;break;
+                case 4:
+                    _.label++;return { value: op[1], done: false };
+                case 5:
+                    _.label++;y = op[1];op = [0];continue;
+                case 7:
+                    op = _.ops.pop();_.trys.pop();continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                        _ = 0;continue;
+                    }
+                    if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                        _.label = op[1];break;
+                    }
+                    if (op[0] === 6 && _.label < t[1]) {
+                        _.label = t[1];t = op;break;
+                    }
+                    if (t && _.label < t[2]) {
+                        _.label = t[2];_.ops.push(op);break;
+                    }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop();continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) {
+            op = [6, e];y = 0;
+        } finally {
+            f = t = 0;
+        }
+        if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var _this = this;
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
+var Api_1 = require("../../Api");
 require("./LikeToggle.css");
+var utils_1 = require("../../utils/utils");
 exports["default"] = function (_a) {
-    var post = _a.post,
+    var state = _a.state,
+        post = _a.post,
         actions = _a.actions;
+    var isLikedByMe = isProfileIncludes(post.likes, state.selfProfile);
     return hyperapp_1.h("div", { "class": "LikeToggle" }, hyperapp_1.h("button", { type: "button", onclick: function () {
-            console.log("on click like");
-            // like apiを叩く
-            // 自分のアカウントがlikeしてるかどうかをみる
-        } }, "\u2661", post.likes.length));
+            return __awaiter(_this, void 0, void 0, function () {
+                var res, resultPost, res, resultPost;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (!isLikedByMe) return [3 /*break*/, 2];
+                            return [4 /*yield*/, Api_1.typetalkApi.unlike(post.topicId, post.id)];
+                        case 1:
+                            res = _a.sent();
+                            resultPost = utils_1.getPost(state, res.like.topicId, res.like.postId);
+                            setLike(resultPost, res.like, false);
+                            actions.updatePost(resultPost);
+                            return [3 /*break*/, 4];
+                        case 2:
+                            return [4 /*yield*/, Api_1.typetalkApi.like(post.topicId, post.id)];
+                        case 3:
+                            res = _a.sent();
+                            resultPost = utils_1.getPost(state, res.like.topicId, res.like.postId);
+                            setLike(resultPost, res.like, true);
+                            actions.updatePost(resultPost);
+                            _a.label = 4;
+                        case 4:
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        } }, isLikedByMe ? "♥" : "♡", " ", post.likes.length));
 };
-},{"./LikeToggle.css":17}],14:[function(require,module,exports) {
+var isProfileIncludes = function (profiles, profile) {
+    return profiles.some(function (p) {
+        return isMe(p.account, profile.account);
+    });
+};
+var isMe = function (accountA, accountB) {
+    return accountA.id === accountB.id;
+};
+var setLike = function (post, profile, isLike) {
+    if (isLike) {
+        post.likes.push(profile);
+    } else {
+        post.likes.some(function (like, i) {
+            if (isMe(like.account, profile.account)) {
+                post.likes.splice(i, 1);
+                return true;
+            }
+        });
+    }
+};
+},{"../../Api":3,"./LikeToggle.css":20,"../../utils/utils":19}],17:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -657,7 +880,8 @@ var Api_1 = require("../../Api");
 require("./Post.css");
 var LikeToggle_1 = __importDefault(require("../atoms/LikeToggle"));
 exports["default"] = function (_a) {
-    var post = _a.post,
+    var state = _a.state,
+        post = _a.post,
         isObserve = _a.isObserve,
         actions = _a.actions,
         view = _a.view;
@@ -684,15 +908,14 @@ exports["default"] = function (_a) {
         io.observe(elm);
     } : null;
     return hyperapp_1.h("div", { "class": "Post", oncreate: oncreate }, hyperapp_1.h("div", { "class": "Post__thumbnail-container" }, hyperapp_1.h("img", { src: post.account.imageUrl, alt: post.account.fullName })), hyperapp_1.h("button", { type: "button", "class": "Post__post-container", onclick: function () {
-            console.log("onclick", post);
             if (view.replyInput === post.id) {
                 actions.replyInput(null);
             } else {
                 actions.replyInput(post.id);
             }
-        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message" }, post.message)), hyperapp_1.h(LikeToggle_1["default"], { actions: actions, post: post }));
+        } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message" }, post.message)), hyperapp_1.h(LikeToggle_1["default"], { state: state, actions: actions, post: post }));
 };
-},{"../../Api":3,"./Post.css":17,"../atoms/LikeToggle":20}],15:[function(require,module,exports) {
+},{"../../Api":3,"./Post.css":20,"../atoms/LikeToggle":22}],18:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -712,7 +935,7 @@ exports["default"] = function (_a) {
             actions.removeMessageList(topic.id);
         } }, "Remove this topic")))));
 };
-},{"./PostListMenu.css":17}],8:[function(require,module,exports) {
+},{"./PostListMenu.css":20}],12:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -726,13 +949,13 @@ var Post_1 = __importDefault(require("../molecules/Post"));
 require("./PostList.css");
 var PostListMenu_1 = __importDefault(require("../molecules/PostListMenu"));
 exports["default"] = function (_a) {
-    var list = _a.list,
+    var state = _a.state,
+        list = _a.list,
         actions = _a.actions,
         view = _a.view;
     return [hyperapp_1.h("div", { "class": "PostList__title" }, hyperapp_1.h("span", { "class": "PostList__topic-name" }, list.topic.name), hyperapp_1.h(PostListMenu_1["default"], { actions: actions, topic: list.topic })), hyperapp_1.h("ul", { "class": "PostList__scroll", oncreate: function (elm) {
             elm.scrollTop = Number.MAX_SAFE_INTEGER;
             var mo = new MutationObserver(function (mutations) {
-                console.log("mutations", elm.scrollHeight);
                 var addedHeight = 0;
                 var isTop = utils_1.isAddedToTop(mutations.map(function (m) {
                     return m.addedNodes[0];
@@ -771,10 +994,10 @@ exports["default"] = function (_a) {
             } else if (post.replyTo) {
                 return hyperapp_1.h("div", { "class": "PostList__reply-line PostList__reply-line--unconnected" });
             }
-        }(), hyperapp_1.h(Post_1["default"], { post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
+        }(), hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
-},{"../../utils/utils":16,"../molecules/Input":13,"../molecules/Post":14,"./PostList.css":17,"../molecules/PostListMenu":15}],9:[function(require,module,exports) {
+},{"../../utils/utils":19,"../molecules/Input":16,"../molecules/Post":17,"./PostList.css":20,"../molecules/PostListMenu":18}],13:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -899,7 +1122,7 @@ exports["default"] = function (_a) {
             } }, topic.topic.name), hyperapp_1.h("span", null, topic.unread.count));
     }))];
 };
-},{"../../Api":3,"./TopicList.css":17}],5:[function(require,module,exports) {
+},{"../../Api":3,"./TopicList.css":20}],5:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -911,12 +1134,23 @@ var PostList_1 = __importDefault(require("../organisms/PostList"));
 var TopicList_1 = __importDefault(require("../organisms/TopicList"));
 require("./Container.css");
 exports["default"] = function (state, actions) {
-    console.log(state);
+    console.log("state", state);
     return hyperapp_1.h("div", { "class": "Container" }, hyperapp_1.h("div", { "class": "Container__topic-list" }, hyperapp_1.h(TopicList_1["default"], { state: state, actions: actions })), state.messageLists.map(function (list) {
-        return hyperapp_1.h("div", { "class": "Container__post-list", key: list.topic.id }, hyperapp_1.h(PostList_1["default"], { list: list, actions: actions, view: state.view }));
+        var column = state.view.columns[list.topic.id];
+        return hyperapp_1.h("div", { draggable: true, ondragstart: function (e) {
+                actions.dragstart(list);
+            }, ondrop: function (e) {
+                actions.drop(list);
+            }, ondragend: function (e) {
+                actions.dragend();
+            }, ondragenter: function (e) {
+                e.preventDefault();
+            }, ondragover: function (e) {
+                e.preventDefault();
+            }, "class": "Container__post-list", key: list.topic.id, style: "flex-basis: " + column.width + "px" }, hyperapp_1.h(PostList_1["default"], { list: list, state: state, actions: actions, view: state.view }));
     }));
 };
-},{"../organisms/PostList":8,"../organisms/TopicList":9,"./Container.css":17}],4:[function(require,module,exports) {
+},{"../organisms/PostList":12,"../organisms/TopicList":13,"./Container.css":20}],4:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -925,12 +1159,14 @@ exports.__esModule = true;
  * 一個のでっかいJSON
  */
 exports.state = {
+    selfProfile: null,
     messageLists: [],
     topics: null,
     replies: null,
     view: {
         tabName: "favorites",
-        replyInput: null
+        replyInput: null,
+        columns: {}
     }
 };
 },{}],1:[function(require,module,exports) {
@@ -1029,7 +1265,7 @@ var actions = hyperapp_1.app(State_1.state, new Actions_1["default"](), Containe
 // initialize
 (function () {
     return __awaiter(_this, void 0, void 0, function () {
-        var topics;
+        var topics, selfProfile;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -1046,6 +1282,10 @@ var actions = hyperapp_1.app(State_1.state, new Actions_1["default"](), Containe
                         var data = stream.data;
                         actions.post(data.post);
                     });
+                    return [4 /*yield*/, Api_1.typetalkApi.getProfile()];
+                case 3:
+                    selfProfile = _a.sent();
+                    actions.selfProfile(selfProfile);
                     return [2 /*return*/];
             }
         });

@@ -1,3 +1,5 @@
+import { IState } from "../State";
+
 export const node2Array = (nodeList: NodeList): Node[] => {
   const a = [];
   for (let i = 0; i < nodeList.length; i++) {
@@ -20,3 +22,16 @@ export const classNames = (list: string[]): string => {
   });
   return result;
 };
+
+export const getPost = (state: IState, topicId: number, postId: number) => {
+  const ml = state.messageLists.find(ml => {
+    return ml.topic.id === topicId;
+  });
+  if (ml) {
+    return ml.posts.find((p, i) => {
+      return p.id === postId;
+    });
+  } else {
+    return null;
+  }
+}

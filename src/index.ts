@@ -21,4 +21,8 @@ const actions: Actions = app(state, new Actions(), Container, document.body);
     const { data } = stream as IpostMessage;
     actions.post(data.post);
   });
+
+  // 自分のプロフィールを取得しておく
+  const selfProfile = await typetalkApi.getProfile();
+  actions.selfProfile(selfProfile);
 })();

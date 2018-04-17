@@ -1,5 +1,6 @@
-import { IState, TabName } from "./State";
-import { IMessageList, IPost, ITopics } from "./typetalk/Models";
+import { IState } from "./State";
+import { IMessageList, IPost, ITopics, IProfile, ITopic } from "./typetalk/Models";
+import { TabName, defaultColumn } from "./models/view";
 
 /**
  * APIの呼び出しはコンポーネント側で行い、ActionsではStateへの変更するだけに留めるのがいいのではないかと思っている
@@ -52,8 +53,10 @@ export default class Actions {
         messageLists: state.messageLists
       };
     } else {
+      state.view.columns[messageList.topic.id] = defaultColumn();
       return {
-        messageLists: [messageList, ...state.messageLists]
+        messageLists: [messageList, ...state.messageLists],
+        view: state.view
       };
     }
   }
@@ -61,7 +64,7 @@ export default class Actions {
   messageList = (messageList: IMessageList) => (state: IState, actions: Actions) => {
     const index = Actions.getMessageListIndex(messageList.topic.id, state);
     if (state.messageLists[index]) {
-      // postsのマージ
+      // merge posts
       const oldPosts = state.messageLists[index].posts;
       const newPosts = messageList.posts;
       const willAdd = [];
@@ -93,6 +96,19 @@ export default class Actions {
     }
   }
 
+  updatePost = (post: IPost) => (state: IState, actions: Actions) => {
+    const ml = state.messageLists.find(ml => {
+      return ml.topic.id === post.topicId;
+    });
+    ml && ml.posts.some((p, i) => {
+      if (p.id === post.id) {
+        ml.posts[i] = p;
+        return true;
+      }
+    });
+    actions.messageList(ml);
+  }
+
   removeMessageList = (topicId: number) => (state: IState, actions: Actions) => {
     let idx;
     state.messageLists.some((ml, i) => {
@@ -108,5 +124,35 @@ export default class Actions {
       };
     }
     return {};
+  }
+
+  selfProfile = (profile: IProfile) => (state: IState, actions: Actions) => {
+    return { selfProfile: profile };
+  };
+
+  dragstart = (messageList: IMessageList) => (state: IState, actions: Actions) => {
+    state.view.draggingMessageList = messageList;
+    return {
+      view: state.view
+    };
+  }
+
+  drop = (messageList: IMessageList) => (state: IState, actions: Actions) => {
+    if (state.view.draggingMessageList) {
+      const from = state.messageLists.indexOf(state.view.draggingMessageList);
+      const to = state.messageLists.indexOf(messageList);
+      state.messageLists[to] = state.view.draggingMessageList;
+      state.messageLists[from] = messageList;
+      return {
+        messageLists: state.messageLists
+      };
+    }
+  }
+
+  dragend = () => (state: IState, actions: Actions) => {
+    state.view.draggingMessageList = null;
+    return {
+      view: state.view
+    };
   }
 }
