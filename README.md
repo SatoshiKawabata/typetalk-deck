@@ -6,8 +6,8 @@
 ### Add `secret.json` file.
 ```json
 {
-  "client_id": "YOUR CLIENT ID",
-  "client_secret": "YOUR CLIENT SECRET"
+  "client_id": "OUR_CLIENT_ID",
+  "client_secret": "OUR_CLIENT_SECRET"
 }
 ```
 

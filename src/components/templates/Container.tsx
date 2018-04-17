@@ -5,8 +5,8 @@ import PostList from "../organisms/PostList";
 import TopicList from "../organisms/TopicList";
 import "./Container.css";
 
-export default (state: IState, actions: Actions) => {
-  console.log("state", state);
+export default ({ state, actions }: { state: IState , actions: Actions}) => {
+
   return (
     <div class="Container">
       <div class="Container__topic-list">
