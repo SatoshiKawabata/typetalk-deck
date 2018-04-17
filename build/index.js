@@ -515,7 +515,7 @@ exports.getPost = function (state, topicId, postId) {
 };
 },{}],19:[function(require,module,exports) {
 
-},{}],13:[function(require,module,exports) {
+},{}],14:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -654,7 +654,7 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
-},{"../../Api":3,"./Input.css":19}],22:[function(require,module,exports) {
+},{"../../Api":3,"./Input.css":19}],23:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -796,7 +796,7 @@ var setLike = function (post, profile, isLike) {
         });
     }
 };
-},{"../../Api":3,"./LikeToggle.css":19,"../../utils/utils":18}],14:[function(require,module,exports) {
+},{"../../Api":3,"./LikeToggle.css":19,"../../utils/utils":18}],15:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -884,9 +884,12 @@ var __importDefault = this && this.__importDefault || function (mod) {
 var _this = this;
 exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
+var showdown_1 = __importDefault(require("showdown"));
 var Api_1 = require("../../Api");
 require("./Post.css");
 var LikeToggle_1 = __importDefault(require("../atoms/LikeToggle"));
+var converter = new showdown_1["default"].Converter();
+var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 exports["default"] = function (_a) {
     var state = _a.state,
         post = _a.post,
@@ -915,10 +918,17 @@ exports["default"] = function (_a) {
         });
         io.observe(elm);
     } : null;
-    var urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    var newMessage = post.message.replace(urlRegex, function (url) {
-        return "<a href=" + url + " target=\"_blank\">" + url + "</a>";
-    });
+    var newMessage = post.message;
+    // Applying markdown only for code and blockquote
+    if (newMessage.indexOf("```") !== -1 || newMessage.indexOf(">") !== -1) {
+        newMessage = converter.makeHtml(newMessage);
+    }
+    // Apply link to HTTP text when markdown is not applied
+    if (newMessage === post.message) {
+        newMessage = post.message.replace(urlRegex, function (url) {
+            return "<a href=" + url + " target=\"_blank\">" + url + "</a>";
+        });
+    }
     return hyperapp_1.h("div", { "class": "Post", oncreate: oncreate }, hyperapp_1.h("div", { "class": "Post__thumbnail-container" }, hyperapp_1.h("img", { src: post.account.imageUrl, alt: post.account.fullName })), hyperapp_1.h("button", { type: "button", "class": "Post__post-container", onclick: function () {
             if (view.replyInput === post.id) {
                 actions.replyInput(null);
@@ -929,7 +939,7 @@ exports["default"] = function (_a) {
             }
         } }, hyperapp_1.h("p", null, post.account.fullName), hyperapp_1.h("p", { "class": "Post__post-message", innerHTML: newMessage })), hyperapp_1.h(LikeToggle_1["default"], { state: state, actions: actions, post: post }));
 };
-},{"../../Api":3,"./Post.css":19,"../atoms/LikeToggle":22}],15:[function(require,module,exports) {
+},{"../../Api":3,"./Post.css":19,"../atoms/LikeToggle":23}],16:[function(require,module,exports) {
 "use strict";
 
 exports.__esModule = true;
@@ -949,7 +959,7 @@ exports["default"] = function (_a) {
             actions.removeMessageList(topic.id);
         } }, "Remove this topic")))));
 };
-},{"./PostListMenu.css":19}],16:[function(require,module,exports) {
+},{"./PostListMenu.css":19}],17:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -987,7 +997,7 @@ exports["default"] = function (_a) {
         }(thread));
     }));
 };
-},{"./ThreadPost.css":19,"./Post":14}],9:[function(require,module,exports) {
+},{"./ThreadPost.css":19,"./Post":15}],9:[function(require,module,exports) {
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1050,7 +1060,7 @@ exports["default"] = function (_a) {
         }(), view.showThread === post.id ? hyperapp_1.h(ThreadPost_1["default"], { state: state, listPost: list.posts, post: post, isObserve: i === 0, actions: actions, view: view }) : null, hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
-},{"../../utils/utils":18,"../molecules/Input":13,"../molecules/Post":14,"./PostList.css":19,"../molecules/PostListMenu":15,"../molecules/ThreadPost":16}],10:[function(require,module,exports) {
+},{"../../utils/utils":18,"../molecules/Input":14,"../molecules/Post":15,"./PostList.css":19,"../molecules/PostListMenu":16,"../molecules/ThreadPost":17}],10:[function(require,module,exports) {
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
