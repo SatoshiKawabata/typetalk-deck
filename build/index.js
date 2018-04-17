@@ -359,7 +359,10 @@ var TypeTalk = /** @class */function () {
             return new Promise(function (res, rej) {
                 var xhr = new XMLHttpRequest();
                 xhr.onload = function () {
-                    res(JSON.parse(xhr.response));
+                    if (xhr.status === 200) {
+                        res(JSON.parse(xhr.response));
+                    }
+                    rej(xhr.response);
                 };
                 xhr.onerror = function () {
                     rej(JSON.parse(xhr.response));
@@ -401,7 +404,10 @@ var TypeTalk = /** @class */function () {
             return new Promise(function (res, rej) {
                 var xhr = new XMLHttpRequest();
                 xhr.onload = function () {
-                    res(JSON.parse(xhr.response));
+                    if (xhr.status === 200) {
+                        res(JSON.parse(xhr.response));
+                    }
+                    rej(xhr.response);
                 };
                 xhr.onerror = function () {
                     rej(JSON.parse(xhr.response));
@@ -461,27 +467,62 @@ var TypeTalk = /** @class */function () {
             });
         });
     };
-    TypeTalk.prototype.getNewToken = function () {};
+    TypeTalk.prototype.getNewToken = function () {
+        var _this = this;
+        var refreshToken = this.token.refresh_token;
+        this.token = null;
+        return this.postMethod("https://typetalk.com/oauth2/access_token", {
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            grant_type: "refresh_token",
+            refresh_token: refreshToken
+        }).then(function (token) {
+            _this.setToken(token);
+            return token;
+        });
+    };
     TypeTalk.prototype.getProfile = function () {
-        return this.getMethod("https://typetalk.com/api/v1/profile");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/profile");
+        });
     };
     TypeTalk.prototype.getTopics = function () {
-        return this.getMethod("https://typetalk.com/api/v1/topics");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics");
+        });
     };
     TypeTalk.prototype.getMessageList = function (topicId, fromId) {
+        var _this = this;
         if (fromId === void 0) {
             fromId = null;
         }
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId, fromId ? { from: fromId } : null);
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId, fromId ? { from: fromId } : null);
+        });
     };
     TypeTalk.prototype.getPost = function (topicId, postId) {
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId);
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId);
+        });
     };
     TypeTalk.prototype.getReplies = function (topicId, postId) {
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/replies");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/replies");
+        });
     };
     TypeTalk.prototype.post = function (topicId, param) {
-        return this.postMethod("https://typetalk.com/api/v1/topics/" + topicId, param);
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.postMethod("https://typetalk.com/api/v1/topics/" + topicId, param)["catch"](function () {
+                _this.getNewToken().then(function () {
+                    return _this.post(topicId, param);
+                });
+            });
+        });
     };
     TypeTalk.prototype.addEventListener = function (evtName, handler) {
         var handlers = this.streamingHandlers.get(evtName);
@@ -510,11 +551,21 @@ var TypeTalk = /** @class */function () {
             // }
         });
     };
+<<<<<<< HEAD
     TypeTalk.prototype.like = function (topicId, postId) {
         return this.postMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
     };
     TypeTalk.prototype.unlike = function (topicId, postId) {
         return this.deleteMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
+=======
+    TypeTalk.prototype.tryConnect = function (connect) {
+        var _this = this;
+        return connect()["catch"](function () {
+            return _this.getNewToken().then(function () {
+                return connect();
+            });
+        });
+>>>>>>> Add refresh token process #16
     };
     return TypeTalk;
 }();
