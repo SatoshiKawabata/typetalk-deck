@@ -13,7 +13,7 @@ import Container from "./Container";
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow || electron.remote.BrowserWindow;
 
-const url = "https://typetalk.com/oauth2/authorize?client_id=B1ZFrQt0kTgw2vRsZzJROsq3HdhGHcDL&scope=my,topic.read,topic.post&redirect_uri=http://localhost&response_type=code";
+const url = typetalkApi.getAuthUrl()
 
 export default (state: IState, actions: Actions) => {
     const authWindow = new BrowserWindow({width: 800, height: 600});
@@ -31,14 +31,18 @@ export default (state: IState, actions: Actions) => {
 
   authWindow.on('closed', a => {
     (async () => {
-    const topics = await typetalkApi.getTopics();
-    actions.topics(topics);
+        const topics = await typetalkApi.getTopics();
+        actions.topics(topics);
 
-    typetalkApi.startStreaming();
-    typetalkApi.addEventListener("postMessage", stream => {
-        const { data } = stream as IpostMessage;
-        actions.post(data.post);
-    });
+        typetalkApi.startStreaming();
+        typetalkApi.addEventListener("postMessage", stream => {
+            const { data } = stream as IpostMessage;
+            actions.post(data.post);
+        });
+
+        const selfProfile = await typetalkApi.getProfile();
+        actions.selfProfile(selfProfile);
+
     })();
   });
 
