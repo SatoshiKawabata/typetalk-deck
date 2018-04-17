@@ -23,7 +23,7 @@ export default (state: IState, actions: Actions) => {
             typetalkApi.auth(matched[1]).then(() => {
                 actions.login();
                 setTimeout(() => {
-                    authWindow.close();
+                    // authWindow.close();
                 }, 0);
             });
         }
