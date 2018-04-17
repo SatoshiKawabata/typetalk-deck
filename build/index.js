@@ -81,6 +81,7 @@ parcelRequire = (function (modules, cache, entry) {
 "use strict";
 
 exports.__esModule = true;
+<<<<<<< HEAD
 exports.defaultColumn = function () {
     return {
         width: 400
@@ -91,15 +92,26 @@ exports.defaultColumn = function () {
 
 exports.__esModule = true;
 var view_1 = require("./models/view");
+=======
+var router_1 = require("@hyperapp/router");
+>>>>>>> #16 login features
 /**
  * APIの呼び出しはコンポーネント側で行い、ActionsではStateへの変更するだけに留めるのがいいのではないかと思っている
  */
 var Actions = /** @class */function () {
     function Actions() {
+        this.location = router_1.location.actions;
         this.topics = function (topics) {
             return function (state, actions) {
                 return {
                     topics: topics
+                };
+            };
+        };
+        this.login = function () {
+            return function (state, actions) {
+                return {
+                    login: true
                 };
             };
         };
@@ -272,7 +284,11 @@ var Actions = /** @class */function () {
     return Actions;
 }();
 exports["default"] = Actions;
+<<<<<<< HEAD
 },{"./models/view":7}],11:[function(require,module,exports) {
+=======
+},{}],17:[function(require,module,exports) {
+>>>>>>> #16 login features
 "use strict";
 
 var __importStar = this && this.__importStar || function (mod) {
@@ -329,6 +345,7 @@ var __importDefault = this && this.__importDefault || function (mod) {
 exports.__esModule = true;
 var querystring = __importStar(require("querystring"));
 var Streaming_1 = __importDefault(require("./Streaming"));
+var request = require('request');
 var secret = querystring.parse(location.search.split("?")[1]);
 var CLIENT_ID = secret.client_id;
 var CLIENT_SECRET = secret.client_secret;
@@ -342,7 +359,10 @@ var TypeTalk = /** @class */function () {
             return new Promise(function (res, rej) {
                 var xhr = new XMLHttpRequest();
                 xhr.onload = function () {
-                    res(JSON.parse(xhr.response));
+                    if (xhr.status === 200) {
+                        res(JSON.parse(xhr.response));
+                    }
+                    rej(xhr.response);
                 };
                 xhr.onerror = function () {
                     rej(JSON.parse(xhr.response));
@@ -356,6 +376,27 @@ var TypeTalk = /** @class */function () {
                 return xhr;
             });
         };
+        // private getNewToken() {
+        //   return new Promise<T>((res, rej) => {
+        //     const xhr = new XMLHttpRequest();
+        //     xhr.onload = () => {
+        //       res(JSON.parse(xhr.response));
+        //     };
+        //     xhr.onerror = () => {
+        //       rej(JSON.parse(xhr.response));
+        //     };
+        //     xhr.open("POST", url);
+        //     if (this.token) {
+        //       xhr.setRequestHeader(
+        //         "Authorization",
+        //         `Bearer ${this.token.access_token}`
+        //       );
+        //     }
+        //     xhr.setRequestHeader("Content-Type", "application/json");
+        //     xhr.send(JSON.stringify(param));
+        //     return xhr;
+        //   });
+        // }
         this.getMethod = function (url, query) {
             if (query === void 0) {
                 query = null;
@@ -363,7 +404,10 @@ var TypeTalk = /** @class */function () {
             return new Promise(function (res, rej) {
                 var xhr = new XMLHttpRequest();
                 xhr.onload = function () {
-                    res(JSON.parse(xhr.response));
+                    if (xhr.status === 200) {
+                        res(JSON.parse(xhr.response));
+                    }
+                    rej(xhr.response);
                 };
                 xhr.onerror = function () {
                     rej(JSON.parse(xhr.response));
@@ -396,38 +440,89 @@ var TypeTalk = /** @class */function () {
         };
         this.streamingHandlers = new Map();
     }
-    TypeTalk.prototype.getToken = function () {
+    TypeTalk.prototype.setToken = function (token) {
+        this.token = token;
+        localStorage.setItem("auth_token", JSON.stringify(this.token));
+    };
+    TypeTalk.prototype.auth = function (code) {
         var _this = this;
+        var params = {
+            client_id: CLIENT_ID,
+            client_secret: CLIENT_SECRET,
+            code: code,
+            redirect_uri: "http://localhost",
+            grant_type: "authorization_code"
+        };
+        var options = {
+            url: "https://typetalk.com/oauth2/access_token",
+            json: params
+        };
+        return new Promise(function (resolve, reject) {
+            request.post(options, function (error, response, body) {
+                if (error != null) {
+                    reject();
+                }
+                _this.setToken(body);
+                resolve();
+            });
+        });
+    };
+    TypeTalk.prototype.getNewToken = function () {
+        var _this = this;
+        var refreshToken = this.token.refresh_token;
+        this.token = null;
         return this.postMethod("https://typetalk.com/oauth2/access_token", {
             client_id: CLIENT_ID,
             client_secret: CLIENT_SECRET,
-            grant_type: "client_credentials",
-            scope: "my,topic.read,topic.post"
+            grant_type: "refresh_token",
+            refresh_token: refreshToken
         }).then(function (token) {
-            _this.token = token;
+            _this.setToken(token);
             return token;
         });
     };
     TypeTalk.prototype.getProfile = function () {
-        return this.getMethod("https://typetalk.com/api/v1/profile");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/profile");
+        });
     };
     TypeTalk.prototype.getTopics = function () {
-        return this.getMethod("https://typetalk.com/api/v1/topics");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics");
+        });
     };
     TypeTalk.prototype.getMessageList = function (topicId, fromId) {
+        var _this = this;
         if (fromId === void 0) {
             fromId = null;
         }
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId, fromId ? { from: fromId } : null);
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId, fromId ? { from: fromId } : null);
+        });
     };
     TypeTalk.prototype.getPost = function (topicId, postId) {
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId);
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId);
+        });
     };
     TypeTalk.prototype.getReplies = function (topicId, postId) {
-        return this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/replies");
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.getMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/replies");
+        });
     };
     TypeTalk.prototype.post = function (topicId, param) {
-        return this.postMethod("https://typetalk.com/api/v1/topics/" + topicId, param);
+        var _this = this;
+        return this.tryConnect(function () {
+            return _this.postMethod("https://typetalk.com/api/v1/topics/" + topicId, param)["catch"](function () {
+                _this.getNewToken().then(function () {
+                    return _this.post(topicId, param);
+                });
+            });
+        });
     };
     TypeTalk.prototype.addEventListener = function (evtName, handler) {
         var handlers = this.streamingHandlers.get(evtName);
@@ -456,16 +551,30 @@ var TypeTalk = /** @class */function () {
             // }
         });
     };
+<<<<<<< HEAD
     TypeTalk.prototype.like = function (topicId, postId) {
         return this.postMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
     };
     TypeTalk.prototype.unlike = function (topicId, postId) {
         return this.deleteMethod("https://typetalk.com/api/v1/topics/" + topicId + "/posts/" + postId + "/like", {});
+=======
+    TypeTalk.prototype.tryConnect = function (connect) {
+        var _this = this;
+        return connect()["catch"](function () {
+            return _this.getNewToken().then(function () {
+                return connect();
+            });
+        });
+>>>>>>> Add refresh token process #16
     };
     return TypeTalk;
 }();
 exports["default"] = TypeTalk;
+<<<<<<< HEAD
 },{"./Streaming":11}],3:[function(require,module,exports) {
+=======
+},{"./Streaming":17}],3:[function(require,module,exports) {
+>>>>>>> #16 login features
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -477,7 +586,156 @@ var Typetalk_1 = __importDefault(require("./typetalk/Typetalk"));
  * Tyoetalkオブジェクトのインスタンス
  */
 exports.typetalkApi = new Typetalk_1["default"]();
+<<<<<<< HEAD
 },{"./typetalk/Typetalk":6}],18:[function(require,module,exports) {
+=======
+},{"./typetalk/Typetalk":6}],8:[function(require,module,exports) {
+"use strict";
+
+var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) {
+            try {
+                step(generator.next(value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function rejected(value) {
+            try {
+                step(generator["throw"](value));
+            } catch (e) {
+                reject(e);
+            }
+        }
+        function step(result) {
+            result.done ? resolve(result.value) : new P(function (resolve) {
+                resolve(result.value);
+            }).then(fulfilled, rejected);
+        }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = this && this.__generator || function (thisArg, body) {
+    var _ = { label: 0, sent: function () {
+            if (t[0] & 1) throw t[1];return t[1];
+        }, trys: [], ops: [] },
+        f,
+        y,
+        t,
+        g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function () {
+        return this;
+    }), g;
+    function verb(n) {
+        return function (v) {
+            return step([n, v]);
+        };
+    }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0:case 1:
+                    t = op;break;
+                case 4:
+                    _.label++;return { value: op[1], done: false };
+                case 5:
+                    _.label++;y = op[1];op = [0];continue;
+                case 7:
+                    op = _.ops.pop();_.trys.pop();continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+                        _ = 0;continue;
+                    }
+                    if (op[0] === 3 && (!t || op[1] > t[0] && op[1] < t[3])) {
+                        _.label = op[1];break;
+                    }
+                    if (op[0] === 6 && _.label < t[1]) {
+                        _.label = t[1];t = op;break;
+                    }
+                    if (t && _.label < t[2]) {
+                        _.label = t[2];_.ops.push(op);break;
+                    }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop();continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) {
+            op = [6, e];y = 0;
+        } finally {
+            f = t = 0;
+        }
+        if (op[0] & 5) throw op[1];return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
+var _this = this;
+exports.__esModule = true;
+var hyperapp_1 = require("hyperapp");
+var Api_1 = require("../../Api");
+var electron = require('electron');
+var BrowserWindow = electron.BrowserWindow || electron.remote.BrowserWindow;
+var url = "https://typetalk.com/oauth2/authorize?client_id=B1ZFrQt0kTgw2vRsZzJROsq3HdhGHcDL&scope=my,topic.read,topic.post&redirect_uri=http://localhost&response_type=code";
+exports["default"] = function (state, actions) {
+    var authWindow = new BrowserWindow({ width: 800, height: 600 });
+    authWindow.webContents.on('did-get-redirect-request', function (event, oldUrl, newUrl) {
+        var matched;
+        if (matched = newUrl.match(/\?code=([^&]*)/)) {
+            Api_1.typetalkApi.auth(matched[1]).then(function () {
+                actions.login();
+                setTimeout(function () {
+                    authWindow.close();
+                }, 0);
+            });
+        }
+    });
+    authWindow.on('closed', function (a) {
+        (function () {
+            return __awaiter(_this, void 0, void 0, function () {
+                var topics;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            return [4 /*yield*/, Api_1.typetalkApi.getTopics()];
+                        case 1:
+                            topics = _a.sent();
+                            actions.topics(topics);
+                            Api_1.typetalkApi.startStreaming();
+                            Api_1.typetalkApi.addEventListener("postMessage", function (stream) {
+                                var data = stream.data;
+                                actions.post(data.post);
+                            });
+                            return [2 /*return*/];
+                    }
+                });
+            });
+        })();
+    });
+    authWindow.loadURL(url);
+    return hyperapp_1.h("div", null, hyperapp_1.h("div", { "class": "login" }, "Logining..."));
+};
+},{"../../Api":3}],13:[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+    return mod && mod.__esModule ? mod : { "default": mod };
+};
+exports.__esModule = true;
+var hyperapp_1 = require("hyperapp");
+var picostyle_1 = __importDefault(require("picostyle"));
+var _p;
+if (typeof picostyle_1["default"] !== "function") {
+    // tslint:disable-next-line:no-var-requires
+    var p = require("picostyle");
+    _p = p(hyperapp_1.h);
+} else {
+    _p = picostyle_1["default"](hyperapp_1.h);
+}
+exports.pstyle = _p;
+},{}],16:[function(require,module,exports) {
+>>>>>>> #16 login features
 "use strict";
 
 exports.__esModule = true;
@@ -501,6 +759,7 @@ exports.classNames = function (list) {
     });
     return result;
 };
+<<<<<<< HEAD
 exports.getPost = function (state, topicId, postId) {
     var ml = state.messageLists.find(function (ml) {
         return ml.topic.id === topicId;
@@ -515,7 +774,14 @@ exports.getPost = function (state, topicId, postId) {
 };
 },{}],19:[function(require,module,exports) {
 
+<<<<<<< HEAD
 },{}],14:[function(require,module,exports) {
+=======
+},{}],13:[function(require,module,exports) {
+=======
+},{}],14:[function(require,module,exports) {
+>>>>>>> #16 login features
+>>>>>>> feature-login
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -654,7 +920,15 @@ exports["default"] = function (_a) {
             post(textarea);
         } }, "Post"));
 };
+<<<<<<< HEAD
 },{"../../Api":3,"./Input.css":19}],23:[function(require,module,exports) {
+=======
+<<<<<<< HEAD
+},{"../../Api":3,"./Input.css":19}],22:[function(require,module,exports) {
+=======
+},{"../../Api":3,"../../polyfills/picostyle":13}],15:[function(require,module,exports) {
+>>>>>>> #16 login features
+>>>>>>> feature-login
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -959,7 +1233,12 @@ exports["default"] = function (_a) {
             actions.removeMessageList(topic.id);
         } }, "Remove this topic")))));
 };
+<<<<<<< HEAD
 },{"./PostListMenu.css":19}],17:[function(require,module,exports) {
+=======
+<<<<<<< HEAD
+},{"./PostListMenu.css":19}],16:[function(require,module,exports) {
+>>>>>>> feature-login
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -997,7 +1276,14 @@ exports["default"] = function (_a) {
         }(thread));
     }));
 };
+<<<<<<< HEAD
 },{"./ThreadPost.css":19,"./Post":15}],9:[function(require,module,exports) {
+=======
+},{"./ThreadPost.css":19,"./Post":14}],9:[function(require,module,exports) {
+=======
+},{"../../Api":3,"../../polyfills/picostyle":13}],11:[function(require,module,exports) {
+>>>>>>> #16 login features
+>>>>>>> feature-login
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1060,7 +1346,15 @@ exports["default"] = function (_a) {
         }(), view.showThread === post.id ? hyperapp_1.h(ThreadPost_1["default"], { state: state, listPost: list.posts, post: post, isObserve: i === 0, actions: actions, view: view }) : null, hyperapp_1.h(Post_1["default"], { state: state, post: post, isObserve: i === 0, actions: actions, view: view }), view.replyInput === post.id ? hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic, replyTo: view.replyInput }) : null);
     })), hyperapp_1.h(Input_1["default"], { actions: actions, topic: list.topic })];
 };
+<<<<<<< HEAD
 },{"../../utils/utils":18,"../molecules/Input":14,"../molecules/Post":15,"./PostList.css":19,"../molecules/PostListMenu":16,"../molecules/ThreadPost":17}],10:[function(require,module,exports) {
+=======
+<<<<<<< HEAD
+},{"../../utils/utils":18,"../molecules/Input":13,"../molecules/Post":14,"./PostList.css":19,"../molecules/PostListMenu":15,"../molecules/ThreadPost":16}],10:[function(require,module,exports) {
+=======
+},{"../../polyfills/picostyle":13,"../../utils/utils":16,"../molecules/Input":14,"../molecules/Post":15}],12:[function(require,module,exports) {
+>>>>>>> #16 login features
+>>>>>>> feature-login
 "use strict";
 
 var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
@@ -1185,7 +1479,11 @@ exports["default"] = function (_a) {
             } }, topic.topic.name), hyperapp_1.h("span", null, topic.unread.count));
     }))];
 };
+<<<<<<< HEAD
 },{"../../Api":3,"./TopicList.css":19}],5:[function(require,module,exports) {
+=======
+},{"../../Api":3,"../../polyfills/picostyle":13,"../../utils/utils":16}],9:[function(require,module,exports) {
+>>>>>>> #16 login features
 "use strict";
 
 var __importDefault = this && this.__importDefault || function (mod) {
@@ -1195,6 +1493,7 @@ exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
 var PostList_1 = __importDefault(require("../organisms/PostList"));
 var TopicList_1 = __importDefault(require("../organisms/TopicList"));
+<<<<<<< HEAD
 require("./Container.css");
 exports["default"] = function (state, actions) {
     console.log("state", state);
@@ -1214,9 +1513,58 @@ exports["default"] = function (state, actions) {
     }));
 };
 },{"../organisms/PostList":9,"../organisms/TopicList":10,"./Container.css":19}],4:[function(require,module,exports) {
+=======
+var Wrapper = picostyle_1.pstyle("div")({
+    "display": "flex",
+    "height": "100vh",
+    "overflow-x": "auto",
+    "overflow-y": "hidden",
+    "font-family": '"Open Sans",Hiragino Sans,Meiryo,Helvetica,Arial,sans-serif',
+    "div.topic-list": {
+        "height": "100vh",
+        "flex-basis": "300px",
+        "flex-shrink": 0,
+        "overflow-y": "auto",
+        "overflow-x": "hidden"
+    },
+    "div.post-list": {
+        "flex-basis": "400px",
+        "flex-shrink": 0
+    }
+});
+exports["default"] = function (_a) {
+    var state = _a.state,
+        actions = _a.actions;
+    return hyperapp_1.h(Wrapper, null, hyperapp_1.h("style", null, "\n          body {\n            padding: 0;\n            margin: 0;\n          }\n\n          ul, p {\n            padding: 0;\n            margin: 0;\n          }\n\n          li {\n            list-style: none;\n          }\n        "), hyperapp_1.h("div", { "class": "topic-list" }, hyperapp_1.h(TopicList_1["default"], { state: state, actions: actions })), state.messageLists.map(function (list) {
+        return hyperapp_1.h("div", { "class": "post-list", key: list.topic.id }, hyperapp_1.h(PostList_1["default"], { list: list, actions: actions, view: state.view }));
+    }));
+};
+},{"../../polyfills/picostyle":13,"../organisms/PostList":11,"../organisms/TopicList":12}],5:[function(require,module,exports) {
+"use strict";
+
+var __importDefault = this && this.__importDefault || function (mod) {
+    return mod && mod.__esModule ? mod : { "default": mod };
+};
+exports.__esModule = true;
+var router_1 = require("@hyperapp/router");
+var hyperapp_1 = require("hyperapp");
+var Login_1 = __importDefault(require("./Login"));
+var Container_1 = __importDefault(require("./Container"));
+exports["default"] = function (state, actions) {
+    var tokenStr = localStorage.getItem("auth_token");
+    if (state.login || tokenStr != null) {
+        return hyperapp_1.h(Container_1["default"], { state: state, actions: actions });
+    }
+    return hyperapp_1.h(router_1.Route, { render: function () {
+            return Login_1["default"](state, actions);
+        } });
+};
+},{"./Login":8,"./Container":9}],4:[function(require,module,exports) {
+>>>>>>> #16 login features
 "use strict";
 
 exports.__esModule = true;
+var router_1 = require("@hyperapp/router");
 /**
  * アプリケーション全体の状態
  * 一個のでっかいJSON
@@ -1226,6 +1574,8 @@ exports.state = {
     messageLists: [],
     topics: null,
     replies: null,
+    location: router_1.location.state,
+    login: false,
     view: {
         tabName: "favorites",
         replyInput: null,
@@ -1324,8 +1674,9 @@ exports.__esModule = true;
 var hyperapp_1 = require("hyperapp");
 var Actions_1 = __importDefault(require("./Actions"));
 var Api_1 = require("./Api");
-var Container_1 = __importDefault(require("./components/templates/Container"));
+var Routes_1 = __importDefault(require("./components/templates/Routes"));
 var State_1 = require("./State");
+<<<<<<< HEAD
 var actions = hyperapp_1.app(State_1.state, new Actions_1["default"](), Container_1["default"], document.body);
 // initialize
 (function () {
@@ -1353,8 +1704,37 @@ var actions = hyperapp_1.app(State_1.state, new Actions_1["default"](), Containe
                     actions.selfProfile(selfProfile);
                     return [2 /*return*/];
             }
+=======
+var tokenStr = localStorage.getItem("auth_token");
+if (tokenStr != null) {
+    Api_1.typetalkApi.setToken(JSON.parse(tokenStr));
+}
+var actions = hyperapp_1.app(State_1.state, new Actions_1["default"](), Routes_1["default"], document.body);
+if (tokenStr != null) {
+    actions.login();
+    (function () {
+        return __awaiter(_this, void 0, void 0, function () {
+            var topics;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        return [4 /*yield*/, Api_1.typetalkApi.getTopics()];
+                    case 1:
+                        topics = _a.sent();
+                        actions.topics(topics);
+                        // streaming
+                        Api_1.typetalkApi.startStreaming();
+                        Api_1.typetalkApi.addEventListener("postMessage", function (stream) {
+                            console.log("stream");
+                            var data = stream.data;
+                            actions.post(data.post);
+                        });
+                        return [2 /*return*/];
+                }
+            });
+>>>>>>> #16 login features
         });
-    });
-})();
-},{"./Actions":2,"./Api":3,"./components/templates/Container":5,"./State":4}]},{},[1])
+    })();
+}
+},{"./Actions":2,"./Api":3,"./components/templates/Routes":5,"./State":4}]},{},[1])
 //# sourceMappingURL=/index.map

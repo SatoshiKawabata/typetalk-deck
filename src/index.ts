@@ -1,28 +1,32 @@
 import { app } from "hyperapp";
 import Actions from "./Actions";
 import { typetalkApi } from "./Api";
-import Container from "./components/templates/Container";
+import routes from "./components/templates/Routes"
 import { state } from "./State";
 import { IpostMessage } from "./typetalk/Streaming";
 
-const actions: Actions = app(state, new Actions(), Container, document.body);
 
-// initialize
-(async () => {
-  await typetalkApi.getToken();
+const tokenStr = localStorage.getItem("auth_token");
+if(tokenStr != null) {
+  typetalkApi.setToken(JSON.parse(tokenStr));
+}
 
-  // トピックを取得
-  const topics = await typetalkApi.getTopics();
-  actions.topics(topics);
+const actions = app(state, new Actions(), routes, document.body);
 
-  // Streaming apiからイベントを受け取る
-  typetalkApi.startStreaming();
-  typetalkApi.addEventListener("postMessage", stream => {
-    const { data } = stream as IpostMessage;
-    actions.post(data.post);
-  });
+if(tokenStr != null) {
+    actions.login();
+    (async () => {
+      const topics = await typetalkApi.getTopics();
+      actions.topics(topics);
 
-  // 自分のプロフィールを取得しておく
-  const selfProfile = await typetalkApi.getProfile();
-  actions.selfProfile(selfProfile);
-})();
+      // streaming
+      typetalkApi.startStreaming();
+      typetalkApi.addEventListener("postMessage", stream => {
+        const { data } = stream as IpostMessage;
+        actions.post(data.post);
+      });
+      // 自分のプロフィールを取得しておく
+      const selfProfile = await typetalkApi.getProfile();
+      actions.selfProfile(selfProfile);
+    })();
+}
