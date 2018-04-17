@@ -2,10 +2,13 @@ import * as electron from "electron";
 import { IPost, ISpace, ITalk, ITopic } from "./Models";
 
 export default class Streaming {
+  constructor(private accessToken: string){}
   start(callback: (msg: IStreaming) => void) {
+    electron.ipcRenderer.send("sync-token", this.accessToken)
     electron.ipcRenderer.on("streaming-message", (event, message) => {
       callback(JSON.parse(message));
     });
+
   }
 }
 

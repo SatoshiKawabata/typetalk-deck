@@ -127,7 +127,7 @@ export default class TypeTalk {
   }
 
   startStreaming() {
-    this.streaming = new Streaming();
+    this.streaming = new Streaming(this.token.access_token);
     this.streaming.start(msg => {
 
       const handlers = this.streamingHandlers.get(msg.type);

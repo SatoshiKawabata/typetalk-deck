@@ -7,7 +7,9 @@
  * }
  */
 const secret = require('./../secret.json');
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
+
+
 app.on('ready', createWindow);
 
 // This will create our app window, no surprise there
@@ -42,6 +44,8 @@ app.on('activate', () => {
 })
 
 // send streaming data
-require("./streaming")(data => {
-  mainWindow.webContents.send("streaming-message", data);
-});
+ipcMain.on("sync-token", (event, arg) => {
+  require("./streaming")(arg)(data => {
+    mainWindow.webContents.send("streaming-message", data);
+  });
+})
