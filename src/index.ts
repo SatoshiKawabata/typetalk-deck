@@ -14,19 +14,5 @@ if(tokenStr != null) {
 const actions = app(state, new Actions(), routes, document.body);
 
 if(tokenStr != null) {
-    actions.login();
-    (async () => {
-      const topics = await typetalkApi.getTopics();
-      actions.topics(topics);
-
-      // streaming
-      typetalkApi.startStreaming();
-      typetalkApi.addEventListener("postMessage", stream => {
-        const { data } = stream as IpostMessage;
-        actions.post(data.post);
-      });
-      // 自分のプロフィールを取得しておく
-      const selfProfile = await typetalkApi.getProfile();
-      actions.selfProfile(selfProfile);
-    })();
+    typetalkApi.initFetch(actions)
 }

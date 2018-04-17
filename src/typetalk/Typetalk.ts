@@ -1,6 +1,6 @@
 import * as querystring from "querystring";
 import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics, ILike } from "./Models";
-import Streaming, { IStreaming, StreamingEvent } from "./Streaming";
+import Streaming, { IStreaming, StreamingEvent, IpostMessage } from "./Streaming";
 const request = require('request');
 
 const secret = querystring.parse(location.search.split("?")[1]);
@@ -17,6 +17,21 @@ export default class TypeTalk {
 
   constructor() {
     this.streamingHandlers = new Map();
+  }
+
+  async initFetch(actions) {
+      const topics = await this.getTopics();
+      actions.topics(topics);
+
+      // streaming
+      this.startStreaming();
+      this.addEventListener("postMessage", stream => {
+        const { data } = stream as IpostMessage;
+        actions.post(data.post);
+      });
+      // 自分のプロフィールを取得しておく
+      const selfProfile = await this.getProfile();
+      actions.selfProfile(selfProfile);
   }
 
   getAuthUrl() {
@@ -47,8 +62,10 @@ export default class TypeTalk {
         if(error != null) {
           reject()
         }
-        this.setToken(body as IAccessToken);
-        resolve()
+        if(response.statusCode === 200) {
+          this.setToken(body as IAccessToken);
+          resolve()
+        }
       })
     })
   }

@@ -23,27 +23,14 @@ export default (state: IState, actions: Actions) => {
             typetalkApi.auth(matched[1]).then(() => {
                 actions.login();
                 setTimeout(() => {
-                    // authWindow.close();
+                    authWindow.close();
                 }, 0);
             });
         }
     });
 
   authWindow.on('closed', a => {
-    (async () => {
-        const topics = await typetalkApi.getTopics();
-        actions.topics(topics);
-
-        typetalkApi.startStreaming();
-        typetalkApi.addEventListener("postMessage", stream => {
-            const { data } = stream as IpostMessage;
-            actions.post(data.post);
-        });
-
-        const selfProfile = await typetalkApi.getProfile();
-        actions.selfProfile(selfProfile);
-
-    })();
+    typetalkApi.initFetch(actions)
   });
 
   authWindow.loadURL(url)
