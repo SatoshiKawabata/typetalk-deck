@@ -1,5 +1,6 @@
 import { IState, TabName } from "./State";
 import { IMessageList, IPost, ITopics } from "./typetalk/Models";
+import { location } from "@hyperapp/router"
 
 /**
  * APIの呼び出しはコンポーネント側で行い、ActionsではStateへの変更するだけに留めるのがいいのではないかと思っている
@@ -15,11 +16,19 @@ export default class Actions {
       }
     });
     return index;
-  }
+ }
+
+ location =  location.actions;
 
   topics = (topics: ITopics) => (state: IState, actions: Actions) => {
     return {
       topics
+    };
+  }
+
+  login = () => (state: IState, actions: Actions) => {
+    return {
+      login: true
     };
   }
 

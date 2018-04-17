@@ -24,9 +24,8 @@ const Wrapper = pstyle("div")({
   }
 });
 
-export default (state: IState, actions: Actions) => {
+export default ({ state, actions }: { state: IState , actions: Actions}) => {
 
-  console.log(state);
   return (
     <Wrapper>
       <style>

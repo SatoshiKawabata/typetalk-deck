@@ -1,4 +1,5 @@
 import { IMessageList, IReplies, ITopics } from "./typetalk/Models";
+import { location } from "@hyperapp/router"
 
 export type TabName = "all" | "favorites";
 
@@ -12,6 +13,8 @@ export interface IState {
   messageLists: IMessageList[];
   replies: IReplies;
   view: IView;
+  location: any;
+  login: boolean;
 }
 
 /**
@@ -22,6 +25,8 @@ export const state: IState = {
   messageLists: [],
   topics: null,
   replies: null,
+  location: location.state,
+  login: false,
   view: {
     tabName: "favorites",
     replyInput: null

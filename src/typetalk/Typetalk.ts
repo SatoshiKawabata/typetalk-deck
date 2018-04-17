@@ -1,6 +1,7 @@
 import * as querystring from "querystring";
 import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics } from "./Models";
 import Streaming, { IStreaming, StreamingEvent } from "./Streaming";
+const request = require('request');
 
 const secret = querystring.parse(location.search.split("?")[1]);
 const CLIENT_ID = secret.client_id;
@@ -18,16 +19,38 @@ export default class TypeTalk {
     this.streamingHandlers = new Map();
   }
 
-  getToken() {
-    return this.postMethod<IAccessToken>("https://typetalk.com/oauth2/access_token", {
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      grant_type: "client_credentials",
-      scope: "my,topic.read,topic.post"
-    }).then((token) => {
-      this.token = token;
-      return token;
-    });
+  setToken(token: IAccessToken) {
+    this.token = token;
+    localStorage.setItem("auth_token", JSON.stringify(this.token));
+  }
+
+  auth(code: string): Promise<void> {
+    const params = {
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        code,
+        redirect_uri: "http://localhost",
+        grant_type: "authorization_code"
+    };
+
+    const options = {
+        url: "https://typetalk.com/oauth2/access_token",
+        json: params
+    };
+
+    return new Promise((resolve, reject) => {
+      request.post(options, (error, response, body) => {
+        if(error != null) {
+          reject()
+        }
+        this.setToken(body as IAccessToken);
+        resolve()
+      })
+    })
+  }
+
+  getNewToken() {
+
   }
 
   getProfile() {
@@ -110,6 +133,28 @@ export default class TypeTalk {
       return xhr;
     });
   }
+
+  // private getNewToken() {
+  //   return new Promise<T>((res, rej) => {
+  //     const xhr = new XMLHttpRequest();
+  //     xhr.onload = () => {
+  //       res(JSON.parse(xhr.response));
+  //     };
+  //     xhr.onerror = () => {
+  //       rej(JSON.parse(xhr.response));
+  //     };
+  //     xhr.open("POST", url);
+  //     if (this.token) {
+  //       xhr.setRequestHeader(
+  //         "Authorization",
+  //         `Bearer ${this.token.access_token}`
+  //       );
+  //     }
+  //     xhr.setRequestHeader("Content-Type", "application/json");
+  //     xhr.send(JSON.stringify(param));
+  //     return xhr;
+  //   });
+  // }
 
   private getMethod = <T>(url: string, query: any = null): Promise<T> => {
     return new Promise<T>((res, rej) => {
