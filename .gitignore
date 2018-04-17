@@ -4,3 +4,5 @@
 .vscode/
 secret.json
 /coverage
+
+build

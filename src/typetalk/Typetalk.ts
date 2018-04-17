@@ -62,9 +62,9 @@ export default class TypeTalk {
         if(error != null) {
           reject()
         }
-        if(response.statusCode === 200) {
-          this.setToken(body as IAccessToken);
-          resolve()
+        if(response.statusCode === 200 && body.access_token != null) {
+            this.setToken(body as IAccessToken);
+            resolve()
         }
       })
     })
