@@ -22,6 +22,7 @@ export const state: IState = {
     tabName: "favorites",
     replyInput: null,
     columns: {},
-    showThread: false,
+    showThread: null,
+    draggingMessageList: null
   }
 };
