@@ -1,4 +1,5 @@
 import { h } from "hyperapp";
+import showdown from "showdown";
 import Actions from "../../Actions";
 import { typetalkApi } from "../../Api";
 import { IState } from "../../State";
@@ -6,6 +7,9 @@ import { IPost } from "../../typetalk/Models";
 import "./Post.css";
 import LikeToggle from "../atoms/LikeToggle";
 import { IView } from "../../models/view";
+
+const converter = new showdown.Converter();
+const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
 
 export default ({state, post, isObserve, actions, view}: {state: IState, post: IPost, isObserve: boolean, actions: Actions, view: IView}) => {
   const oncreate = isObserve ?
@@ -20,10 +24,20 @@ export default ({state, post, isObserve, actions, view}: {state: IState, post: I
       io.observe(elm);
     }
     : null;
-  const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-  const newMessage = post.message.replace(urlRegex, (url: string) => {
-      return `<a href=${url} target="_blank">${url}</a>`;
-  });
+
+  let newMessage = post.message;
+  // Applying markdown only for code and blockquote
+  if (newMessage.indexOf("```") !== -1 || newMessage.indexOf(">") !== -1) {
+      newMessage = converter.makeHtml(newMessage);
+  }
+
+  // Apply link to HTTP text when markdown is not applied
+  if (newMessage === post.message) {
+      newMessage = post.message.replace(urlRegex, (url: string) => {
+          return `<a href=${url} target="_blank">${url}</a>`;
+      });
+  }
+
   return (
     <div class="Post" oncreate={oncreate}>
       <div class="Post__thumbnail-container">
