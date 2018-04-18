@@ -1,10 +1,11 @@
 .ThreadPost {
     position: absolute;
-    bottom: 96px;
+    bottom: 130px;
     left: 0;
     background-color: white;
     box-shadow: 0px 1px 8px 0 #888888;
     width: 99%;
+    z-index: 100;
 }
 
 .ThreadPost__container {
@@ -16,5 +17,6 @@
 }
 
 .ThreadPost .PostList__reply-line {
-    height: 24px;
+    /* height: 24px; */
+    left: 19px;
 }
