@@ -10,6 +10,8 @@
 .Post__thumbnail-container>img {
   width: 40px;
   height: 40px;
+  border-radius: 50%;
+  border: solid 2px #e7e0df;
 }
 
 .Post p {
@@ -17,10 +19,15 @@
 }
 
 .Post__post-container {
-  padding: 0;
+  width: 100%;
+  min-height: 60px;
+  padding: 10px;
+  padding-right: 45px;
+  overflow: hidden;
   background: #fff;
   border: none;
   text-align: left;
+  border-top: solid 1px #e7e0df;
 }
 
 .Post__post-message {
@@ -37,6 +44,7 @@
 }
 
 .Post__post-message pre {
+  width: 100%;
   display: block;
   border: 1px solid rgba(0,0,0,.15);
   padding: 8px;
@@ -49,5 +57,22 @@
   color: #3e3e3e;
   background-color: #f5f5f5;
   tab-size: 2;
+}
 
+.Post__post-message>a {
+  word-wrap: break-word;
+}
+
+.LikeToggle {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  padding: 2px 4px;
+  z-index: 10;
+  border: solid 1px #e7e0df;
+}
+.LikeToggle>button {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(255,166,149,1);
 }
