@@ -9,6 +9,7 @@ import { typetalkApi } from "../../Api";
 import { IAccessToken } from "../../typetalk/Models";
 import { IpostMessage } from "../../typetalk/Streaming";
 import Container from "./Container";
+import { notification } from "../../Notification";
 
 const electron = require('electron');
 const BrowserWindow = electron.BrowserWindow || electron.remote.BrowserWindow;
@@ -30,7 +31,7 @@ export default (state: IState, actions: Actions) => {
     });
 
   authWindow.on('closed', a => {
-    typetalkApi.initFetch(actions)
+    typetalkApi.initFetch(actions, notification)
   });
 
   authWindow.loadURL(url)

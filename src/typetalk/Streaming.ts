@@ -65,8 +65,20 @@ export interface IpostMessage {
     "mentions": any[];
     "exceedsAttachmentLimit": boolean;
     "directMessage": any;
+    "isDirectMessage": boolean;
   };
 }
+
+export interface INotifyMention {
+  "type": "notifyMention";
+  "data": {
+    "mention": {
+      "post": IPost;
+    }
+  };
+}
+
+
 
 export interface IaddTalkPost extends IStreaming {
   type: "addTalkPost";

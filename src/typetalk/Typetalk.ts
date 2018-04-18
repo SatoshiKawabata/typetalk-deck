@@ -1,11 +1,14 @@
 import * as querystring from "querystring";
 import { IAccessToken, IMessageList, IPost, IPostParam, IProfile, IReplies, ITopic, ITopics, ILike, IAttachment } from "./Models";
-import Streaming, { IStreaming, StreamingEvent, IpostMessage } from "./Streaming";
+import Streaming, { IStreaming, StreamingEvent, IpostMessage, INotifyMention } from "./Streaming";
 const request = require('request');
 
 const secret = querystring.parse(location.search.split("?")[1]);
 const CLIENT_ID = secret.client_id;
 const CLIENT_SECRET = secret.client_secret;
+
+const notifier = require('electron-notifications')
+
 
 /**
  * Typetalk api
@@ -19,7 +22,7 @@ export default class TypeTalk {
     this.streamingHandlers = new Map();
   }
 
-  async initFetch(actions) {
+  async initFetch(actions, notificationFn: (body: string) => void) {
       const topics = await this.getTopics();
       actions.topics(topics);
 
@@ -28,7 +31,16 @@ export default class TypeTalk {
       this.addEventListener("postMessage", stream => {
         const { data } = stream as IpostMessage;
         actions.post(data.post);
+
+        if(data.isDirectMessage) {
+          notificationFn(data.post.message)
+        }
       });
+      this.addEventListener("notifyMention", stream => {
+        const { data } = stream as INotifyMention;
+
+        notificationFn(data.mention.post.message)
+      })
       // 自分のプロフィールを取得しておく
       const selfProfile = await this.getProfile();
       actions.selfProfile(selfProfile);

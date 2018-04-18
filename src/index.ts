@@ -3,7 +3,7 @@ import Actions from "./Actions";
 import { typetalkApi } from "./Api";
 import routes from "./components/templates/Routes"
 import { state } from "./State";
-import { IpostMessage } from "./typetalk/Streaming";
+import { notification } from "./Notification";
 
 
 const tokenStr = localStorage.getItem("auth_token");
@@ -14,5 +14,5 @@ if(tokenStr != null) {
 const actions = app(state, new Actions(), routes, document.body);
 
 if(tokenStr != null) {
-    typetalkApi.initFetch(actions)
+    typetalkApi.initFetch(actions, notification)
 }
