@@ -4,6 +4,9 @@
 
 ## setup
 ### Add `secret.json` file.
+This secret from Made application using Authorization Code.
+[How to get it.](https://developer.nulab-inc.com/ja/docs/typetalk/#code)
+
 ```json
 {
   "client_id": "OUR_CLIENT_ID",
