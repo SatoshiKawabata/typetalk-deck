@@ -1,8 +1,17 @@
-/node_modules
+**/node_modules
 /dist
 .cache/
 .vscode/
 secret.json
 /coverage
 
-build
+# build directory
+/build/*
+!/build/index.html
+
+# dist for installer
+/dist
+
+# app package directory
+/app/build
+/app/electron

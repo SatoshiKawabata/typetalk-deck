@@ -24,7 +24,7 @@ function createWindow () {
   mainWindow.loadURL(`file://${ __dirname }/../build/index.html?client_id=${secret.client_id}&client_secret=${secret.client_secret}`);
 
   // open dev tools by default so we can see any console errors
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', function () {
     mainWindow = null

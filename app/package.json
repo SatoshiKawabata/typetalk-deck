@@ -1,0 +1,16 @@
+{
+  "name": "typetalk-deck",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hyperapp/router": "^0.7.0",
+    "electron-notifications": "^1.0.0",
+    "hyperapp": "^1.1.2",
+    "request": "^2.85.0",
+    "showdown": "^1.8.6",
+    "ws": "^5.1.0"
+  }
+}

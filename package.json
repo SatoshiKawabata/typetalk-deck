@@ -1,8 +1,22 @@
 {
-  "name": "parcel-hyperapp-typescript",
+  "name": "typetalk-deck",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "electron/main.js",
+  "build": {
+    "appId": "jp.blogspot.uqtimes.samples.electron",
+    "directories": {
+      "app": "app"
+    },
+    "artifactName": "${productName}_installer.${ext}",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
   "scripts": {
     "start": "rm -rd .cache/ ; npm run build ; ./node_modules/.bin/watch 'npm run build' ./src",
     "build": "./node_modules/.bin/parcel build ./src/index.ts --target electron --no-minify -d ./build -o index",
@@ -10,13 +24,18 @@
     "tslint": "./node_modules/.bin/tslint --fix ./src/**/*.ts",
     "test": "./node_modules/.bin/jest --coverage --no-cache",
     "test-watch": "npm test ; ./node_modules/.bin/watch 'npm run test' ./src",
-    "clean-cache": "rm -rd .cache/ ; rm ./build/index.js ./build/index.map ./build/index.css"
+    "clean-cache": "rm -rd .cache/ ; rm ./build/index.js ./build/index.map ./build/index.css",
+    "build-app": "rm -rd ./app/build ; cp -rf ./build ./app/build ; cp -rf ./secret.json ./app ; cp -rf ./electron ./app",
+    "pack": "npm run build-app ; npm run pack:mac ; npm run pack:win",
+    "pack:mac": "./node_modules/.bin/build --mac --x64",
+    "pack:win": "./node_modules/.bin/build --win --x64"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^22.2.0",
     "electron": "^1.8.3",
+    "electron-builder": "^20.8.1",
     "jest": "^22.4.3",
     "parcel-bundler": "^1.6.2",
     "ts-jest": "^22.4.2",
