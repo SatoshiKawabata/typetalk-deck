@@ -14,13 +14,13 @@ This secret from Made application using Authorization Code.
 }
 ```
 
-### npm install
+### installation
 ```
 npm i
 ```
 
 ## npm scripts
-### start web view app
+### start web view app (build & watch)
 ```
 npm start
 ```
@@ -40,7 +40,7 @@ npm run electron
 npm run tslint
 ```
 
-### test
+### test (test & watch)
 ```
 npm run test-watch
 ```
@@ -48,4 +48,9 @@ npm run test-watch
 #### test
 ```
 npm run test
+```
+
+### build installer
+```
+npm run pack
 ```
